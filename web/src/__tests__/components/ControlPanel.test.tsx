@@ -30,12 +30,11 @@ describe('ControlPanel Component', () => {
   it('renders all portal pair options', () => {
     render(<ControlPanel {...defaultProps} />);
     
-    // Check for all portal pair options (0-4)
+    // Check for all portal pair options (0-3)
     expect(screen.getByText('0')).toBeInTheDocument();
     expect(screen.getByText('1')).toBeInTheDocument();
     expect(screen.getByText('2')).toBeInTheDocument();
     expect(screen.getByText('3')).toBeInTheDocument();
-    expect(screen.getByText('4')).toBeInTheDocument();
   });
 
   it('highlights the selected size option', () => {
@@ -87,11 +86,11 @@ describe('ControlPanel Component', () => {
       />
     );
     
-    // Click the '4' portal pairs button
-    fireEvent.click(screen.getByText('4'));
+    // Click the '3' portal pairs button
+    fireEvent.click(screen.getByText('3'));
     
-    // Check if onPortalPairsChange was called with 4
-    expect(mockOnPortalPairsChange).toHaveBeenCalledWith(4);
+    // Check if onPortalPairsChange was called with 3
+    expect(mockOnPortalPairsChange).toHaveBeenCalledWith(3);
   });
 
   it('calls onGenerate when the Generate button is clicked', () => {
@@ -147,7 +146,7 @@ describe('ControlPanel Component', () => {
     });
     
     // Check that all portal pair buttons are disabled
-    const portalButtons = ['0', '1', '2', '3', '4'].map(num => 
+    const portalButtons = ['0', '1', '2', '3'].map(num => 
       screen.getByText(num).closest('button')
     );
     

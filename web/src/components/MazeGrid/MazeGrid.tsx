@@ -12,7 +12,7 @@ interface MazeGridProps {
 // SVG definitions for portal icons (5 unique designs)
 const portalSvgIcons = [
   // Portal 1 - Spiral design
-  (size: number, cx: number, cy: number, id: number) => (
+  (size: number, cx: number, cy: number) => (
     <g className={styles.portalSvg}>
       <path 
         d={`M ${cx} ${cy} 
@@ -26,7 +26,7 @@ const portalSvgIcons = [
     </g>
   ),
   // Portal 2 - Star design
-  (size: number, cx: number, cy: number, id: number) => {
+  (size: number, cx: number, cy: number) => {
     const points = 5;
     const outerRadius = size * 0.4;
     const innerRadius = size * 0.2;
@@ -50,7 +50,7 @@ const portalSvgIcons = [
     );
   },
   // Portal 3 - Hexagon design
-  (size: number, cx: number, cy: number, id: number) => {
+  (size: number, cx: number, cy: number) => {
     const points = 6;
     const radius = size * 0.35;
     let pathData = "";
@@ -72,7 +72,7 @@ const portalSvgIcons = [
     );
   },
   // Portal 4 - Diamond design
-  (size: number, cx: number, cy: number, id: number) => (
+  (size: number, cx: number, cy: number) => (
     <g className={styles.portalSvg}>
       <rect 
         x={cx - size * 0.35} 
@@ -87,7 +87,7 @@ const portalSvgIcons = [
     </g>
   ),
   // Portal 5 - Concentric circles design
-  (size: number, cx: number, cy: number, id: number) => (
+  (size: number, cx: number, cy: number) => (
     <g className={styles.portalSvg}>
       <circle cx={cx} cy={cy} r={size * 0.35} fill="#3b82f6" stroke="#1d4ed8" strokeWidth="1.5" />
       <circle cx={cx} cy={cy} r={size * 0.20} fill="none" stroke="white" strokeWidth="1.5" />
@@ -217,7 +217,7 @@ const MazeGrid: React.FC<MazeGridProps> = memo(({
     const cy = y * cellSize + cellSize / 2;
     
     // Render the SVG icon
-    return portalSvgIcons[iconIndex](cellSize, cx, cy, portalId);
+    return portalSvgIcons[iconIndex](cellSize, cx, cy);
   };
   
   return (

@@ -89,7 +89,7 @@ describe('Portal System', () => {
     it('should create valid portal pair links', () => {
       const width = 15;
       const height = 15;
-      const numPairs = 4;
+      const numPairs = 3;
       
       const maze = generateMaze({ width, height });
       const mazeWithPortals = addPortals(maze, numPairs);
@@ -131,7 +131,7 @@ describe('Portal System', () => {
     it('should place portals at dead-ends (cells with 3 walls)', () => {
       const width = 20;
       const height = 20;
-      const numPairs = 5;
+      const numPairs = 3;
       
       const maze = generateMaze({ width, height });
       const mazeWithPortals = addPortals(maze, numPairs);

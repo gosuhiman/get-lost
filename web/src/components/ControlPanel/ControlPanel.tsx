@@ -26,7 +26,7 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
   hasMaze,
 }) => {
   const sizeOptions: MazeSize[] = ['S', 'M', 'L', 'XL'];
-  const portalOptions = [0, 1, 2, 3, 4];
+  const portalOptions = [0, 1, 2, 3];
   
   return (
     <div className={styles.controlPanel}>

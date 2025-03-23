@@ -154,7 +154,7 @@ export default function Home() {
         default:
           // Check for number keys 1-4 for portal pairs
           const num = parseInt(e.key);
-          if (!isNaN(num) && num >= 1 && num <= 4) {
+          if (!isNaN(num) && num >= 1 && num <= 3) {
             handlePortalPairsChange(num);
           }
           break;
