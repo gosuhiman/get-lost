@@ -2,7 +2,8 @@
 
 ## Core Architecture
 
-```src/
+```
+src/
 ├── app/
 │   ├── layout.tsx        # Root layout with print styles
 │   └── page.tsx          # Main maze interface (client component)
@@ -16,6 +17,7 @@
 ├── lib/
 │   └── maze/             # Core maze logic
 │       ├── generator.ts  # DFS algorithm implementation
+│       ├── portals.ts    # Portal pair generation and handling
 │       └── types.ts      # Type definitions
 └── styles/               # Global CSS
 ```
@@ -25,7 +27,7 @@
 
 **1. Maze Generation (Client-side)**
 
-- Depth-First Search algorithm implementation[^1]
+- Depth-First Search algorithm implementation
 - Dynamic size configuration (S/M/L/XL)
 - Pure TypeScript implementation:
 
@@ -33,11 +35,20 @@
 interface Cell {
   walls: [boolean, boolean, boolean, boolean]; // N,E,S,W
   visited: boolean;
+  portal?: {
+    id: number;     // Unique identifier for the portal pair
+    pairIndex: number; // Index of the paired portal cell
+  };
 }
 
 function generateMaze(width: number, height: number): Cell[][] {
   // DFS implementation with backtracking
   // Returns 2D array of cells with wall data
+}
+
+function addPortals(maze: Cell[][], numPairs: number = 2): Cell[][] {
+  // Randomly place portal pairs throughout the maze
+  // Returns updated maze with portal data
 }
 ```
 
@@ -45,7 +56,8 @@ function generateMaze(width: number, height: number): Cell[][] {
 
 - Vector-based maze display using `<svg>`
 - Responsive scaling with viewBox
-- Printable output via CSS media queries[^3]:
+- Printable output via CSS media queries:
+- Print-friendly black and white design:
 
 ```css
 @media print {
@@ -60,18 +72,39 @@ function generateMaze(width: number, height: number): Cell[][] {
 const [mazeData, setMazeData] = useState<Cell[][]>([]);
 const [isGenerating, setIsGenerating] = useState(false);
 const [printReady, setPrintReady] = useState(false);
+const [portalPairs, setPortalPairs] = useState<number>(2); // Number of portal pairs
 ```
 
+**4. Portal System**
+
+- Portal pairs for instant transportation between maze locations
+- Each portal connects to exactly one other portal (paired)
+- Multiple portal pairs can exist in a single maze
+- Implementation considerations:
+  - Portals placed after maze generation to ensure path validity
+  - Portal pairs share the same ID but have different indices
+  - Print-friendly visual indicators for paired portals (numbered labels)
+  - Portals cannot be placed on entrance or exit cells
+
+```typescript
+function placePortalPairs(maze: Cell[][], numPairs: number): void {
+  // For each pair:
+  // 1. Select two random accessible cells
+  // 2. Assign matching portal IDs with different pair indices
+  // 3. Ensure no overlapping portal placements
+}
+```
 
 ## Technical Decisions
 
 | Component | Technology | Rationale |
 | :-- | :-- | :-- |
-| Rendering Engine | SVG | Scalable vectors for crisp printing[^3] |
-| Algorithm | DFS | Simple implementation with good branching[^1] |
+| Rendering Engine | SVG | Scalable vectors for crisp printing |
+| Algorithm | DFS | Simple implementation with good branching |
 | State Management | React useState | Lightweight for single-page needs |
 | Styling | CSS Modules | Component-scoped styles |
 | Print Handling | CSS Media Query | Native browser print optimization |
+| Portal Visualization | SVG with Text | Black and white print-compatible labeling system |
 
 ## Performance Considerations
 
@@ -82,7 +115,8 @@ const [printReady, setPrintReady] = useState(false);
 ```typescript
 const generateMaze = async () => {
   const { dfsGenerator } = await import('@/lib/maze/generator');
-  // ... generation logic
+  const { addPortalPairs } = await import('@/lib/maze/portals');
+  // ... generation logic with portal addition
 }
 ```
 
@@ -94,75 +128,68 @@ Implement DFS with:
     - Stack-based backtracking
     - Random neighbor selection
     - Wall removal logic
-2. **SVG Component**
+    
+2. **Portal System**
+Implement portal generation:
+    - Random placement algorithm
+    - Pair linking logic
+    - Validation to ensure proper placement
+
+3. **SVG Component**
 
 ```tsx
 <svg viewBox={`0 0 ${width*10} ${height*10}`}>
   {mazeData.map((row, y) => row.map((cell, x) => (
     <g key={`${x}-${y}`}>
-      {cell.walls[^0] && <line x1={x*10} y1={y*10} x2={(x+1)*10} y2={y*10}/>}
+      {cell.walls[0] && <line x1={x*10} y1={y*10} x2={(x+1)*10} y2={y*10}/>}
       {/* Render other walls similarly */}
+      {cell.portal && (
+        <>
+          <circle 
+            cx={x*10 + 5} 
+            cy={y*10 + 5} 
+            r={3.5} 
+            fill="white" 
+            stroke="black" 
+            strokeWidth="0.8"
+          />
+          <text 
+            x={x*10 + 5} 
+            y={y*10 + 5.5} 
+            fontSize="4px" 
+            textAnchor="middle" 
+            dominantBaseline="middle"
+            fill="black"
+          >
+            {cell.portal.id}
+          </text>
+        </>
+      )}
     </g>
   ))}
 </svg>
 ```
 
-3. **Print Optimization**
+4. **Print Optimization**
     - Dedicated print layout in `app/layout.tsx`
     - @media print styles remove UI controls
     - SVG scaling based on paper size detection
+    - Black and white compatible visual elements
+    - High contrast design for portal indicators
 
 ## Testing Strategy
 
 1. Jest unit tests for maze generator
     - Complete path existence verification
     - No isolated cells check
+    - Portal pair connectivity validation
 2. Cypress E2E tests for:
     - Generation button workflow
     - Print dialog triggering
     - Responsive sizing
+    - Portal pair visual consistency
+3. Print tests:
+    - Black and white printer compatibility
+    - Portal identification legibility
 
-This architecture leverages Next.js 15's app router while keeping the bundle size minimal (≈50kb gzipped). The DFS algorithm provides O(n) complexity suitable for browser execution, with Web Workers preventing main thread blocking for large mazes[^1][^3].
-
-<div style="text-align: center">⁂</div>
-
-[^1]: https://www.youtube.com/watch?v=EN733Aq4ynM
-
-[^2]: https://phrase.com/blog/posts/next-js-app-router-localization-next-intl/
-
-[^3]: https://www.youtube.com/watch?v=BkFDgLXTu9U
-
-[^4]: https://nextjs.org
-
-[^5]: https://www.wisp.blog/blog/the-ultimate-guide-to-organizing-your-nextjs-15-project-structure
-
-[^6]: https://dev.to/robertobutti/how-to-build-a-dynamic-website-with-nextjs-15-app-router-react-19-storyblok-and-bun--2972
-
-[^7]: https://blog.cloudflare.com/ai-labyrinth/
-
-[^8]: https://www.linkedin.com/pulse/nextjs-15-modern-design-best-practices-scalable-web-ruben-mora-vargas-bmvye
-
-[^9]: https://www.reddit.com/r/nextjs/comments/1ig4qw8/what_is_the_best_way_of_organizing_the_file/
-
-[^10]: https://www.youtube.com/watch?v=Zq5fmkH0T78
-
-[^11]: https://nextjs.org/blog/next-15
-
-[^12]: https://stackoverflow.com/questions/38502/whats-a-good-algorithm-to-generate-a-maze
-
-[^13]: https://nextjs.org/docs/architecture
-
-[^14]: https://www.youtube.com/watch?v=DLeAPn5-TIA
-
-[^15]: https://nextjs.org/docs/app/getting-started/project-structure
-
-[^16]: https://help.maze.co/hc/en-us/articles/9768967895059--Website-Test-Run-usability-tests-on-your-live-websites
-
-[^17]: https://labyrinth.tech
-
-[^18]: https://www.youtube.com/watch?v=nHjqkLV_Tp0
-
-[^19]: https://www.youtube.com/watch?v=L0g87N0piT0\&vl=en
-
-[^20]: https://dev.to/dimeloper/whats-new-in-nextjs-15-new-hooks-turbopack-and-more-2lo8
-
+This architecture leverages Next.js 15's app router while keeping the bundle size minimal (≈50kb gzipped). The DFS algorithm provides O(n) complexity suitable for browser execution, with Web Workers preventing main thread blocking for large mazes.
