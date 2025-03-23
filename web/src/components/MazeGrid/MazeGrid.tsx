@@ -4,6 +4,8 @@ import React, { memo, useEffect, useState } from 'react';
 import { Cell } from '@/lib/maze/types';
 import styles from './styles.module.css';
 import { MazeTheme } from '@/app/page';
+import { findPath } from '@/lib/maze/solver';
+import { hasPortal, getPortalPair } from '@/lib/maze/portals';
 
 interface MazeGridProps {
   mazeData: Cell[][];
@@ -235,6 +237,8 @@ const MazeGrid: React.FC<MazeGridProps> = memo(({
 }) => {
   const [isDesktop, setIsDesktop] = useState(true);
   const [isPrinting, setIsPrinting] = useState(false);
+  const [showSolution, setShowSolution] = useState(false);
+  const [solutionPath, setSolutionPath] = useState<[number, number][]>([]);
   const colors = getThemeColors(theme);
 
   // Handle resize events to determine if we're on desktop or mobile
@@ -302,6 +306,33 @@ const MazeGrid: React.FC<MazeGridProps> = memo(({
       console.log(`MazeGrid received ${portalCount} portals`);
     }
   }, [mazeData]);
+
+  // Reset solution when maze data changes
+  useEffect(() => {
+    // When a new maze is generated, hide and clear the solution
+    setShowSolution(false);
+    setSolutionPath([]);
+  }, [mazeData]);
+
+  // Handle solution button click
+  const handleSolveMaze = () => {
+    if (!mazeData || !mazeData.length) return;
+    
+    // If solution is already shown, just toggle visibility
+    if (showSolution) {
+      setShowSolution(false);
+      return;
+    }
+    
+    // Calculate the solution path
+    const height = mazeData.length;
+    const width = mazeData[0].length;
+    const path = findPath(mazeData, 0, 0, width - 1, height - 1);
+    
+    // Store and show the solution
+    setSolutionPath(path);
+    setShowSolution(true);
+  };
 
   if (!mazeData || !mazeData.length) {
     return (
@@ -391,6 +422,77 @@ const MazeGrid: React.FC<MazeGridProps> = memo(({
             </>
           )}
           
+          {/* Draw the solution path if it's visible */}
+          {showSolution && solutionPath.length > 1 && (
+            <g className={styles.solutionPath}>
+              {/* Draw path segments with appropriate colors */}
+              {solutionPath.map((point, index) => {
+                // Skip the last point as it won't have a "next" point to draw a line to
+                if (index === solutionPath.length - 1) return null;
+                
+                const [x, y] = point;
+                const [nextX, nextY] = solutionPath[index + 1];
+                
+                // Check if this segment involves teleportation (portal)
+                const isTeleport = hasPortal(mazeData, x, y) && 
+                  (() => {
+                    const portalPair = getPortalPair(mazeData, x, y);
+                    return portalPair && portalPair[0] === nextX && portalPair[1] === nextY;
+                  })();
+                
+                const startX = x * cellSize + cellSize / 2;
+                const startY = y * cellSize + cellSize / 2;
+                const endX = nextX * cellSize + cellSize / 2;
+                const endY = nextY * cellSize + cellSize / 2;
+                
+                return (
+                  <line
+                    key={`path-segment-${index}`}
+                    x1={startX}
+                    y1={startY}
+                    x2={endX}
+                    y2={endY}
+                    stroke={isTeleport 
+                      ? (theme === 'dungeon' ? '#e879f9' : '#8b5cf6') // Purple for teleport
+                      : (theme === 'dungeon' ? '#fbbf24' : '#60a5fa') // Regular path color
+                    }
+                    strokeWidth={cellSize * 0.25}
+                    strokeLinecap="round"
+                    strokeDasharray={isTeleport ? '0' : cellSize * 0.5}
+                    strokeOpacity={isTeleport ? 1 : 0.8}
+                  />
+                );
+              })}
+              
+              {/* Add dots at each waypoint */}
+              {solutionPath.map((point, index) => {
+                // Skip first and last points (start and end points)
+                if (index === 0 || index === solutionPath.length - 1) return null;
+                
+                const [x, y] = point;
+                const pathX = x * cellSize + cellSize / 2;
+                const pathY = y * cellSize + cellSize / 2;
+                
+                // Check if this point is on a portal
+                const isPortal = hasPortal(mazeData, x, y);
+                
+                return (
+                  <circle
+                    key={`solution-point-${index}`}
+                    cx={pathX}
+                    cy={pathY}
+                    r={cellSize * 0.15}
+                    fill={isPortal 
+                      ? (theme === 'dungeon' ? '#e879f9' : '#8b5cf6') // Purple for portal points
+                      : (theme === 'dungeon' ? '#fbbf24' : '#60a5fa') // Regular path color
+                    }
+                    strokeWidth="0"
+                  />
+                );
+              })}
+            </g>
+          )}
+          
           {/* Draw the maze grid */}
           {mazeData.map((row, y) => (
             row.map((cell, x) => (
@@ -464,14 +566,26 @@ const MazeGrid: React.FC<MazeGridProps> = memo(({
           <span className={styles.mazeSizeInfo}>
             {width}x{height} maze
           </span>
-          {/* Only show on desktop */}
-          {isDesktop && (
-            <span className={styles.mazeInstructions}>
-              <span className={styles.mazeInstructionIcon}>💡</span>
-              Use portals to navigate between maze sections!
-            </span>
-          )}
+          
+          {/* Remove the portal instructions tooltip */}
+          
+          {/* Solve button - hidden when printing, repositioned for visibility */}
         </div>
+        
+        {/* Solve button - positioned outside mazeInfo for better visibility */}
+        {!isPrinting && mazeData.length > 0 && (
+          <button 
+            className={styles.solveButton}
+            onClick={handleSolveMaze}
+            aria-label="Solve Maze"
+            type="button"
+          >
+            <span className={styles.solveButtonIcon}>
+              {showSolution ? '🔍' : '💡'}
+            </span>
+            {showSolution ? 'Hide Solution' : 'Solve Maze'}
+          </button>
+        )}
       </div>
     </div>
   );

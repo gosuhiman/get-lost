@@ -137,18 +137,57 @@
 }
 
 .mazeInstructions {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 8px 16px;
-  background-color: #f0f9ff;
-  border-radius: 20px;
-  color: #0369a1;
-  border: 1px solid #bae6fd;
+  display: none;
 }
 
 .mazeInstructionIcon {
   font-size: 18px;
+}
+
+/* Solve button styling - updated to be more prominent */
+.solveButton {
+  margin-top: 16px;
+  padding: 10px 20px;
+  background-color: #3b82f6;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.3s, transform 0.2s;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  font-size: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 180px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.solveButtonIcon {
+  font-size: 18px;
+}
+
+.solveButton:hover {
+  background-color: #2563eb;
+  transform: translateY(-1px);
+  box-shadow: 0 6px 8px rgba(0, 0, 0, 0.15);
+}
+
+.solveButton:active {
+  transform: translateY(1px);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* Adjust button styles for theme */
+:global(.theme-space) .solveButton {
+  background-color: #6366f1;
+}
+
+:global(.theme-space) .solveButton:hover {
+  background-color: #4f46e5;
 }
 
 /* Media query for large screens to enhance desktop experience */
