@@ -4,6 +4,23 @@ import '@testing-library/jest-dom';
 import MazeGrid from '@/components/MazeGrid/MazeGrid';
 import { Cell } from '@/lib/maze/types';
 
+// Mock the window resize event for isDesktop state
+beforeEach(() => {
+  // Set up a default window width that represents desktop
+  Object.defineProperty(window, 'innerWidth', {
+    writable: true,
+    configurable: true,
+    value: 1200, // Desktop width
+  });
+  
+  // Mock the window resize listener
+  window.addEventListener = jest.fn().mockImplementation((event, cb) => {
+    if (event === 'resize') {
+      cb();
+    }
+  });
+});
+
 // Helper to create a simple test maze
 function createTestMaze(width: number, height: number): Cell[][] {
   // Create a maze with all walls intact
@@ -35,8 +52,13 @@ describe('MazeGrid Component', () => {
   it('renders empty state when no maze data is provided', () => {
     render(<MazeGrid mazeData={[]} />);
     
-    const emptyStateText = screen.getByText(/Maze loading or no maze data available/i);
+    // Check for the new empty state text
+    const emptyStateText = screen.getByText(/Generate a maze to begin your adventure/i);
     expect(emptyStateText).toBeInTheDocument();
+    
+    // Check for the emoji in the empty state
+    const emptyStateIcon = screen.getByText('🧩');
+    expect(emptyStateIcon).toBeInTheDocument();
   });
   
   it('renders the SVG when maze data is provided', () => {
@@ -47,6 +69,10 @@ describe('MazeGrid Component', () => {
     // Check if SVG element is rendered
     const svgElement = container.querySelector('svg');
     expect(svgElement).toBeInTheDocument();
+    
+    // Check if grid background pattern is rendered
+    const patternElement = container.querySelector('pattern');
+    expect(patternElement).toBeInTheDocument();
   });
   
   it('renders the correct number of wall lines', () => {
@@ -59,20 +85,27 @@ describe('MazeGrid Component', () => {
     // Count wall lines (each cell has up to 4 walls)
     // We removed 2 walls from our test maze
     const expectedWallCount = (width * height * 4) - 2;
-    const wallElements = container.querySelectorAll('line');
+    const wallElements = container.querySelectorAll('.wall');
     
     expect(wallElements.length).toBe(expectedWallCount);
   });
   
-  it('renders start and end points', () => {
+  it('renders start and end points with labels', () => {
     const mazeData = createTestMaze(5, 5);
     
     const { container } = render(<MazeGrid mazeData={mazeData} />);
     
     // There should be start and end circles
-    const circleElements = container.querySelectorAll('circle');
-    // 2 circles for start/end plus 2 for portals
-    expect(circleElements.length).toBe(4);
+    const startPoint = container.querySelector('.startPoint');
+    const endPoint = container.querySelector('.endPoint');
+    expect(startPoint).toBeInTheDocument();
+    expect(endPoint).toBeInTheDocument();
+    
+    // Check for start and end labels
+    const startLabel = screen.getByText('S');
+    const endLabel = screen.getByText('E');
+    expect(startLabel).toBeInTheDocument();
+    expect(endLabel).toBeInTheDocument();
   });
   
   it('renders portal indicators correctly', () => {
@@ -80,13 +113,14 @@ describe('MazeGrid Component', () => {
     
     const { container } = render(<MazeGrid mazeData={mazeData} />);
     
-    // Find portal text elements
-    const portalTextElements = container.querySelectorAll('text');
-    expect(portalTextElements.length).toBe(2);
+    // Find portal circles
+    const portalElements = container.querySelectorAll('.portal');
+    expect(portalElements.length).toBe(2);
     
-    // Both portal texts should show the same ID
-    expect(portalTextElements[0].textContent).toBe('1');
-    expect(portalTextElements[1].textContent).toBe('1');
+    // Find portal text elements (excluding S and E labels)
+    const portalTexts = Array.from(container.querySelectorAll('text'))
+      .filter(el => el.textContent === '1');
+    expect(portalTexts.length).toBe(2);
   });
   
   it('applies the correct viewBox based on maze dimensions', () => {
@@ -117,5 +151,21 @@ describe('MazeGrid Component', () => {
     // Check SVG has print attribute
     const svgElement = container.querySelector('[data-print-svg="true"]');
     expect(svgElement).toBeInTheDocument();
+  });
+  
+  it('renders maze info with dimensions', () => {
+    const width = 5;
+    const height = 5;
+    const mazeData = createTestMaze(width, height);
+    
+    render(<MazeGrid mazeData={mazeData} />);
+    
+    // Check for maze dimensions info
+    const sizeInfo = screen.getByText(`${width}x${height} maze`);
+    expect(sizeInfo).toBeInTheDocument();
+    
+    // Check for portal instructions (only on desktop)
+    const instructions = screen.getByText(/Use portals to navigate/i);
+    expect(instructions).toBeInTheDocument();
   });
 }); 

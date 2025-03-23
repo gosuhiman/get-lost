@@ -2,8 +2,17 @@
   width: 100%;
   display: flex;
   justify-content: center;
-  margin: 20px 0;
+  align-items: center;
+  margin: 0;
   min-height: 600px;
+  overflow: hidden;
+}
+
+.mazeWrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
 }
 
 .mazeGrid {
@@ -14,8 +23,11 @@
   height: auto;
   min-height: 500px;
   background-color: #ffffff;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-  border-radius: 4px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+  border-radius: 12px;
+  padding: 16px;
+  box-sizing: border-box;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
 .a4Paper {
@@ -23,28 +35,88 @@
   aspect-ratio: 1 / 1.414;
 }
 
+.emptyState {
+  width: 300px;
+  height: 424px; /* A4 proportional empty state */
+  border: 2px dashed #ccc;
+  border-radius: 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: #666;
+  font-size: 16px;
+  text-align: center;
+  padding: 20px;
+  background-color: #f9fafb;
+}
+
+.emptyStateIcon {
+  font-size: 48px;
+  margin-bottom: 20px;
+}
+
+.emptyStateText {
+  font-weight: 600;
+  font-size: 18px;
+  margin-bottom: 8px;
+}
+
+.emptyStateSubtext {
+  font-size: 14px;
+  color: #888;
+}
+
 .wall {
   stroke: #000000;
   stroke-width: 2;
   stroke-linecap: square;
+  transition: stroke-width 0.2s;
+}
+
+.cell:hover .wall {
+  stroke-width: 3;
+}
+
+.startPointGroup, .endPointGroup {
+  cursor: pointer;
+  transition: transform 0.2s ease;
+}
+
+.startPointGroup:hover, .endPointGroup:hover {
+  transform: scale(1.2);
 }
 
 .startPoint {
   fill: #2e7d32;
   stroke: #1b5e20;
   stroke-width: 0.5;
+  filter: drop-shadow(0 2px 3px rgba(0, 0, 0, 0.3));
 }
 
 .endPoint {
   fill: #c62828;
   stroke: #8e0000;
   stroke-width: 0.5;
+  filter: drop-shadow(0 2px 3px rgba(0, 0, 0, 0.3));
+}
+
+.startEndText {
+  font-family: Arial, sans-serif;
+  font-weight: bold;
+  user-select: none;
 }
 
 .portal {
-  fill: yellow;
+  fill: #ffd700;
   stroke: black;
   stroke-width: 1.2;
+  filter: drop-shadow(0 2px 3px rgba(0, 0, 0, 0.2));
+  transition: transform 0.2s ease;
+}
+
+g:hover .portal {
+  transform: scale(1.1);
 }
 
 .portalText {
@@ -52,6 +124,88 @@
   font-weight: bold;
   user-select: none;
   font-size: 4px;
+  pointer-events: none;
+}
+
+.mazeInfo {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: 16px;
+  gap: 8px;
+  font-size: 14px;
+  color: #666;
+}
+
+.mazeSizeInfo {
+  font-weight: 600;
+}
+
+.mazeInstructions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  background-color: #f0f9ff;
+  border-radius: 20px;
+  color: #0369a1;
+  border: 1px solid #bae6fd;
+}
+
+.mazeInstructionIcon {
+  font-size: 18px;
+}
+
+/* Media query for large screens to enhance desktop experience */
+@media (min-width: 1280px) {
+  .mazeGrid {
+    max-width: 1200px;
+    transition: transform 0.3s ease;
+  }
+  
+  .mazeGrid:hover {
+    transform: scale(1.02);
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.2);
+  }
+}
+
+/* Media query for mobile */
+@media (max-width: 768px) {
+  .container {
+    min-height: 400px;
+  }
+  
+  .mazeGrid {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    padding: 8px;
+  }
+  
+  .wall {
+    stroke-width: 1.5;
+  }
+  
+  .emptyState {
+    width: 250px;
+    height: 350px;
+    font-size: 14px;
+  }
+  
+  .emptyStateIcon {
+    font-size: 36px;
+    margin-bottom: 12px;
+  }
+  
+  .emptyStateText {
+    font-size: 16px;
+  }
+  
+  .emptyStateSubtext {
+    font-size: 12px;
+  }
+  
+  .mazeInfo {
+    font-size: 12px;
+  }
 }
 
 @media print {
@@ -70,6 +224,11 @@
     align-items: center !important;
     overflow: visible !important;
     transform-origin: top left !important;
+  }
+  
+  .mazeWrapper {
+    width: 100% !important;
+    height: 100% !important;
   }
   
   .mazeGrid {
@@ -95,7 +254,11 @@
     stroke-width: 1 !important;
   }
   
-  .portalText {
+  .portalText, .startEndText {
     font-size: smaller !important;
+  }
+  
+  .mazeInfo {
+    display: none !important;
   }
 } 

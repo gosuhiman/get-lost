@@ -36,6 +36,7 @@ src/
 - Responsive scaling with viewBox
 - Printable output via CSS media queries
 - Print-friendly black and white design
+- Adapts to both desktop and mobile screen sizes
 
 **3. State Management**
 
@@ -59,6 +60,17 @@ src/
   - Users must use portals to travel between these sections
   - Each portal effectively acts as a teleporting dead-end
 
+**5. Responsive Design**
+
+- Primary focus on desktop user experience
+- Graceful adaptation to mobile devices
+- Touch-friendly controls for mobile users
+- Adaptive layout that maintains maze quality across devices
+- Design considerations for mobile usability:
+  - Simplified controls for touch screens
+  - Optimal maze size scaling for smaller screens
+  - Thumb-friendly interaction zones
+
 ## Technical Decisions
 
 | Component | Technology | Rationale |
@@ -69,6 +81,7 @@ src/
 | Styling | CSS Modules | Component-scoped styles |
 | Print Handling | CSS Media Query | Native browser print optimization |
 | Portal Visualization | SVG with Text | Black and white print-compatible labeling system |
+| Responsive Design | CSS Media Queries + Flexbox | Optimized for desktop with mobile compatibility |
 
 ## Performance Considerations
 
@@ -76,6 +89,8 @@ src/
 2. Debounced generate button (300ms cooldown)
 3. SVG memoization with React.memo
 4. Dynamic import for maze algorithm
+5. Optimized touch event handling for mobile devices
+6. Performance throttling on low-powered mobile devices
 
 ## Implementation Steps
 
@@ -104,6 +119,13 @@ Implement portal generation:
     - Black and white compatible visual elements
     - High contrast design for portal indicators
 
+5. **Responsive Design Implementation**
+    - Desktop-first development approach
+    - Responsive breakpoints for different device sizes
+    - Mobile-specific UI adjustments
+    - Touch event handling for mobile interactions
+    - Device-appropriate maze size suggestions
+
 ## Testing Strategy
 
 1. Jest unit tests for maze generator
@@ -120,6 +142,11 @@ Implement portal generation:
 3. Print tests:
     - Black and white printer compatibility
     - Portal identification legibility
+4. Device compatibility tests:
+    - Desktop browsers (Chrome, Firefox, Safari, Edge)
+    - Mobile browsers (iOS Safari, Chrome for Android)
+    - Touch interaction testing
+    - Various screen size testing (from large desktop to small mobile)
 
 This architecture leverages Next.js 15's app router while keeping the bundle size minimal (≈50kb gzipped). The DFS algorithm provides O(n) complexity suitable for browser execution, with Web Workers preventing main thread blocking for large mazes.
 

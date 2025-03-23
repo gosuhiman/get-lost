@@ -18,6 +18,8 @@ export default function Home() {
 
   // Generate maze using our new method that creates sectioned maze with portals
   const handleGenerateMaze = useCallback(() => {
+    if (isGenerating) return; // Prevent multiple simultaneous generations
+    
     setIsGenerating(true);
     
     // Use setTimeout to prevent UI blocking and allow loading state to render
@@ -54,7 +56,7 @@ export default function Home() {
         setIsGenerating(false);
       }
     }, 10);
-  }, [selectedSize, portalPairs, initialLoad]);
+  }, [selectedSize, portalPairs, initialLoad, isGenerating]);
 
   // Handle size change
   const handleSizeChange = useCallback((size: MazeSize) => {
@@ -68,6 +70,9 @@ export default function Home() {
 
   // Handle print functionality with improved print layout
   const handlePrint = useCallback(() => {
+    // Don't allow printing if no maze or currently generating
+    if (!mazeData.length || isGenerating) return;
+    
     // Set print ready state to adjust styling
     setPrintReady(true);
     
@@ -109,7 +114,61 @@ export default function Home() {
         }, 500);
       }, 100);
     }, 300);
-  }, []);
+  }, [mazeData.length, isGenerating]);
+
+  // Handle keyboard shortcuts - desktop-only enhancement
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Skip if user is typing in an input field
+      if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) {
+        return;
+      }
+      
+      // Skip if modifiers are pressed
+      if (e.ctrlKey || e.altKey || e.metaKey) {
+        return;
+      }
+      
+      switch (e.key.toLowerCase()) {
+        case 'g':
+          handleGenerateMaze();
+          break;
+        case 'p':
+          handlePrint();
+          break;
+        case '1':
+          handleSizeChange('S');
+          break;
+        case '2':
+          handleSizeChange('M');
+          break;
+        case '3':
+          handleSizeChange('L');
+          break;
+        case '4':
+          handleSizeChange('XL');
+          break;
+        case '0':
+          handlePortalPairsChange(0);
+          break;
+        default:
+          // Check for number keys 1-4 for portal pairs
+          const num = parseInt(e.key);
+          if (!isNaN(num) && num >= 1 && num <= 4) {
+            handlePortalPairsChange(num);
+          }
+          break;
+      }
+    };
+    
+    // Add event listener for keyboard shortcuts
+    window.addEventListener('keydown', handleKeyDown);
+    
+    // Cleanup
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [handleGenerateMaze, handlePrint, handleSizeChange, handlePortalPairsChange]);
 
   // Generate a maze on initial load
   useEffect(() => {
@@ -125,9 +184,9 @@ export default function Home() {
   }, [initialLoad, handleGenerateMaze]);
 
   return (
-    <main className={`flex min-h-screen flex-col items-center ${printReady ? 'p-0' : 'p-4 sm:p-12'}`}>
-      <div className={`z-10 w-full flex flex-col items-center ${printReady ? 'print-focused' : ''}`}>
-        <h1 className={`text-3xl font-bold mb-6 ${printReady ? 'no-print' : ''}`}>Get Lost - Maze Generator</h1>
+    <main className={`min-h-screen flex flex-col lg:flex-row ${printReady ? 'p-0' : 'p-4 lg:p-8'}`}>
+      <div className={`lg:w-1/4 max-w-md ${printReady ? 'hidden' : 'mb-6 lg:mb-0 lg:mr-6'}`}>
+        <h1 className="text-3xl font-bold mb-6 lg:text-4xl">Get Lost - Maze Generator</h1>
         
         <ControlPanel
           selectedSize={selectedSize}
@@ -140,16 +199,16 @@ export default function Home() {
           hasMaze={mazeData.length > 0}
         />
         
-        <div className={`mt-4 ${printReady ? 'print-ready' : ''}`}>
-          <MazeGrid 
-            mazeData={mazeData}
-            cellSize={10}
-          />
-        </div>
-        
-        <p className={`text-sm text-gray-500 mt-4 ${printReady ? 'no-print' : ''}`}>
+        <p className="text-sm text-gray-500 mt-4">
           Randomly generated maze with {portalPairs} portal pair{portalPairs !== 1 ? 's' : ''}.
         </p>
+      </div>
+      
+      <div className={`lg:w-3/4 flex-grow flex items-center justify-center ${printReady ? 'print-ready w-full h-full' : ''}`}>
+        <MazeGrid 
+          mazeData={mazeData}
+          cellSize={10}
+        />
       </div>
     </main>
   );
