@@ -17,7 +17,7 @@
 
 .mazeGrid {
   max-width: 95vw;
-  max-height: 80vh;
+  max-height: 90vh;
   display: block;
   width: 100%;
   height: auto;
@@ -32,10 +32,6 @@
 
 .gridPattern {
   stroke-width: 0.5;
-}
-
-.gridBackground {
-  /* Default styling for the grid background */
 }
 
 /* Theme-specific styling */
@@ -157,8 +153,13 @@
 
 /* Media query for large screens to enhance desktop experience */
 @media (min-width: 1280px) {
+  .container {
+    min-height: 800px;
+  }
+  
   .mazeGrid {
-    max-width: 1200px;
+    max-width: 95vw;
+    max-height: 90vh;
     transition: box-shadow 0.3s ease;
   }
   

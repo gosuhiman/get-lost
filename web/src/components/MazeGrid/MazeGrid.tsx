@@ -329,8 +329,8 @@ const MazeGrid: React.FC<MazeGridProps> = memo(({
   // A4 proportion calculation (1:1.414 ratio - width:height)
   const a4Ratio = 1.414;
   
-  // For screen display
-  const maxWidth = isDesktop ? Math.min(900, viewBoxWidth * 1.5) : Math.min(500, viewBoxWidth);
+  // For screen display - updated to allow larger size on desktop
+  const maxWidth = isDesktop ? Math.min(1600, viewBoxWidth * 2.5) : Math.min(500, viewBoxWidth);
   const maxHeight = maxWidth * a4Ratio;
   
   // Entry and exit points (top-left and bottom-right)
@@ -367,8 +367,8 @@ const MazeGrid: React.FC<MazeGridProps> = memo(({
           style={{ 
             width: `${maxWidth}px`,
             height: `${maxHeight}px`,
-            minWidth: isDesktop ? '700px' : '320px',
-            minHeight: isDesktop ? '800px' : '450px',
+            minWidth: isDesktop ? '900px' : '320px',
+            minHeight: isDesktop ? '900px' : '450px',
             backgroundColor: colors.background,
           }}
           data-print-svg="true"
