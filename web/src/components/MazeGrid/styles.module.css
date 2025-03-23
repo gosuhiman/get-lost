@@ -1,0 +1,47 @@
+.container {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  margin: 20px 0;
+  min-height: 600px;
+}
+
+.mazeGrid {
+  max-width: 95vw;
+  max-height: 80vh;
+  display: block;
+  width: 100%;
+  height: auto;
+  min-height: 500px;
+  background-color: #ffffff;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  border-radius: 4px;
+}
+
+.wall {
+  stroke: #000000;
+  stroke-width: 2;
+  stroke-linecap: square;
+}
+
+.startPoint {
+  fill: #2e7d32;
+  stroke: #1b5e20;
+  stroke-width: 0.5;
+}
+
+.endPoint {
+  fill: #c62828;
+  stroke: #8e0000;
+  stroke-width: 0.5;
+}
+
+@media print {
+  .mazeGrid {
+    max-width: 100%;
+    max-height: 100%;
+    zoom: 120%;
+    background-color: white;
+    box-shadow: none;
+  }
+} 

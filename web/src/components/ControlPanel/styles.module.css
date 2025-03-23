@@ -1,0 +1,116 @@
+.controlPanel {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  padding: 1.5rem;
+  background-color: #ffffff;
+  border-radius: 8px;
+  max-width: 600px;
+  margin: 0 auto;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.controlRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  align-items: center;
+  justify-content: center;
+}
+
+.sizeSelector {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.sizeButton {
+  padding: 0.5rem 1rem;
+  border: 2px solid #d1d5db;
+  border-radius: 4px;
+  background: white;
+  cursor: pointer;
+  font-weight: 500;
+  transition: all 0.2s;
+  color: #4b5563;
+}
+
+.sizeButton:hover {
+  border-color: #9ca3af;
+  background-color: #f9fafb;
+}
+
+.sizeButtonActive {
+  border-color: #2563eb;
+  background-color: #eff6ff;
+  color: #1e40af;
+}
+
+.actionButton {
+  padding: 0.75rem 1.5rem;
+  border: none;
+  border-radius: 4px;
+  background-color: #2563eb;
+  color: white;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.actionButton:hover {
+  background-color: #1d4ed8;
+}
+
+.actionButton:disabled {
+  background-color: #93c5fd;
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+.printButton {
+  background-color: #059669;
+}
+
+.printButton:hover {
+  background-color: #047857;
+}
+
+.controlLabel {
+  font-weight: 500;
+  color: #4b5563;
+}
+
+@media (prefers-color-scheme: dark) {
+  .controlPanel {
+    background-color: #1f2937;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  }
+  
+  .sizeButton {
+    background: #374151;
+    border-color: #4b5563;
+    color: #e5e7eb;
+  }
+  
+  .sizeButton:hover {
+    border-color: #9ca3af;
+    background-color: #4b5563;
+  }
+  
+  .sizeButtonActive {
+    border-color: #3b82f6;
+    background-color: #1e40af;
+    color: #eff6ff;
+  }
+  
+  .controlLabel {
+    color: #e5e7eb;
+  }
+}
+
+@media print {
+  .controlPanel {
+    display: none;
+  }
+} 
