@@ -5,230 +5,16 @@ import { Cell } from '@/lib/maze/types';
 import styles from './styles.module.css';
 import { MazeTheme } from '@/app/page';
 import { findPath } from '@/lib/maze/solver';
-import { hasPortal, getPortalPair } from '@/lib/maze/portals';
+import { getThemeColors } from '@/lib/maze/themeUtils';
+import { startPointSvg, endPointSvg } from './MazeSvgIcons';
+import MazeCells from './MazeCells';
+import MazeSolutionPath from './MazeSolutionPath';
 
 interface MazeGridProps {
   mazeData: Cell[][];
   cellSize?: number;
   theme?: MazeTheme;
 }
-
-// SVG definitions for portal icons (5 unique designs)
-const portalSvgIcons = [
-  // Portal 1 - Spiral design
-  (size: number, cx: number, cy: number, theme: MazeTheme) => {
-    const colors = getThemeColors(theme);
-    return (
-      <g className={styles.portalSvg}>
-        <path 
-          d={`M ${cx} ${cy} 
-             m ${-size * 0.35} 0 
-             a ${size * 0.35} ${size * 0.35} 0 1 1 ${size * 0.7} 0 
-             a ${size * 0.35} ${size * 0.35} 0 1 1 ${-size * 0.7} 0`} 
-          fill="none" 
-          stroke={colors.portal1.stroke} 
-          strokeWidth={size * 0.15} 
-        />
-      </g>
-    );
-  },
-  // Portal 2 - Star design
-  (size: number, cx: number, cy: number, theme: MazeTheme) => {
-    const colors = getThemeColors(theme);
-    const points = 5;
-    const outerRadius = size * 0.4;
-    const innerRadius = size * 0.2;
-    let pathData = "";
-    
-    for (let i = 0; i < points * 2; i++) {
-      const radius = i % 2 ? innerRadius : outerRadius;
-      const angle = (Math.PI / points) * i;
-      const x = cx + radius * Math.sin(angle);
-      const y = cy - radius * Math.cos(angle);
-      
-      if (i === 0) pathData += `M ${x} ${y} `;
-      else pathData += `L ${x} ${y} `;
-    }
-    pathData += "Z";
-    
-    return (
-      <g className={styles.portalSvg}>
-        <path d={pathData} fill={colors.portal2.fill} stroke={colors.portal2.stroke} strokeWidth="1.5" />
-      </g>
-    );
-  },
-  // Portal 3 - Hexagon design
-  (size: number, cx: number, cy: number, theme: MazeTheme) => {
-    const colors = getThemeColors(theme);
-    const points = 6;
-    const radius = size * 0.35;
-    let pathData = "";
-    
-    for (let i = 0; i < points; i++) {
-      const angle = (Math.PI * 2 / points) * i;
-      const x = cx + radius * Math.cos(angle);
-      const y = cy + radius * Math.sin(angle);
-      
-      if (i === 0) pathData += `M ${x} ${y} `;
-      else pathData += `L ${x} ${y} `;
-    }
-    pathData += "Z";
-    
-    return (
-      <g className={styles.portalSvg}>
-        <path d={pathData} fill={colors.portal3.fill} stroke={colors.portal3.stroke} strokeWidth="1.5" />
-      </g>
-    );
-  },
-  // Portal 4 - Diamond design
-  (size: number, cx: number, cy: number, theme: MazeTheme) => {
-    const colors = getThemeColors(theme);
-    return (
-      <g className={styles.portalSvg}>
-        <rect 
-          x={cx - size * 0.35} 
-          y={cy - size * 0.35}
-          width={size * 0.7}
-          height={size * 0.7}
-          fill={colors.portal4.fill}
-          stroke={colors.portal4.stroke}
-          strokeWidth="1.5"
-          transform={`rotate(45 ${cx} ${cy})`}
-        />
-      </g>
-    );
-  },
-  // Portal 5 - Concentric circles design
-  (size: number, cx: number, cy: number, theme: MazeTheme) => {
-    const colors = getThemeColors(theme);
-    return (
-      <g className={styles.portalSvg}>
-        <circle cx={cx} cy={cy} r={size * 0.35} fill={colors.portal5.fill} stroke={colors.portal5.stroke} strokeWidth="1.5" />
-        <circle cx={cx} cy={cy} r={size * 0.20} fill="none" stroke="white" strokeWidth="1.5" />
-      </g>
-    );
-  }
-];
-
-// Theme colors for various elements
-const getThemeColors = (theme: MazeTheme = 'dungeon') => {
-  switch(theme) {
-    case 'space':
-      return {
-        background: '#0f172a',
-        grid: '#334155',
-        wall: '#94a3b8',
-        start: {
-          fill: '#4ade80',
-          stroke: '#16a34a'
-        },
-        end: {
-          fill: '#fb7185',
-          stroke: '#e11d48'
-        },
-        portal1: {
-          fill: '#c4b5fd',
-          stroke: '#8b5cf6'
-        },
-        portal2: {
-          fill: '#fcd34d',
-          stroke: '#f59e0b'
-        },
-        portal3: {
-          fill: '#5eead4',
-          stroke: '#14b8a6'
-        },
-        portal4: {
-          fill: '#f9a8d4',
-          stroke: '#ec4899'
-        },
-        portal5: {
-          fill: '#93c5fd',
-          stroke: '#3b82f6'
-        }
-      };
-    default: // dungeon
-      return {
-        background: '#44403c',
-        grid: '#78716c',
-        wall: '#292524',
-        start: {
-          fill: '#a3e635',
-          stroke: '#65a30d'
-        },
-        end: {
-          fill: '#f87171',
-          stroke: '#b91c1c'
-        },
-        portal1: {
-          fill: '#a78bfa',
-          stroke: '#7c3aed'
-        },
-        portal2: {
-          fill: '#facc15',
-          stroke: '#ca8a04'
-        },
-        portal3: {
-          fill: '#2dd4bf',
-          stroke: '#0d9488'
-        },
-        portal4: {
-          fill: '#f472b6',
-          stroke: '#db2777'
-        },
-        portal5: {
-          fill: '#60a5fa',
-          stroke: '#2563eb'
-        }
-      };
-  }
-};
-
-// SVG definitions for start and end points
-const startPointSvg = (cx: number, cy: number, size: number, theme: MazeTheme = 'dungeon') => {
-  const colors = getThemeColors(theme);
-  return (
-    <g className={styles.startPointGroup}>
-      <path 
-        d={`M ${cx - size * 0.35} ${cy}
-           L ${cx + size * 0.35} ${cy - size * 0.35}
-           L ${cx + size * 0.35} ${cy + size * 0.35}
-           Z`} 
-        fill={colors.start.fill}
-        stroke={colors.start.stroke}
-        strokeWidth="1.5"
-      />
-    </g>
-  );
-};
-
-const endPointSvg = (cx: number, cy: number, size: number, theme: MazeTheme = 'dungeon') => {
-  const colors = getThemeColors(theme);
-  return (
-    <g className={styles.endPointGroup}>
-      <path
-        d={`M ${cx - size * 0.35} ${cy - size * 0.35}
-           L ${cx + size * 0.35} ${cy - size * 0.35}
-           L ${cx + size * 0.35} ${cy + size * 0.35}
-           L ${cx - size * 0.35} ${cy + size * 0.35}
-           Z`}
-        fill={colors.end.fill}
-        stroke={colors.end.stroke}
-        strokeWidth="1.5"
-      />
-      <path
-        d={`M ${cx - size * 0.15} ${cy - size * 0.15}
-           L ${cx + size * 0.15} ${cy - size * 0.15}
-           L ${cx + size * 0.15} ${cy + size * 0.15}
-           L ${cx - size * 0.15} ${cy + size * 0.15}
-           Z`}
-        fill="white"
-        stroke={colors.end.stroke}
-        strokeWidth="1"
-      />
-    </g>
-  );
-};
 
 const MazeGrid: React.FC<MazeGridProps> = memo(({ 
   mazeData, 
@@ -370,22 +156,6 @@ const MazeGrid: React.FC<MazeGridProps> = memo(({
   const endX = width - 1;
   const endY = height - 1;
   
-  // Function to render the appropriate portal icon based on ID
-  const renderPortalIcon = (cell: Cell, x: number, y: number) => {
-    if (!cell.portal) return null;
-    
-    // Get the portal ID and use it to determine which icon to use (modulo the number of available icons)
-    const portalId = cell.portal.id;
-    const iconIndex = (portalId - 1) % portalSvgIcons.length;
-    
-    // Calculate the center position
-    const cx = x * cellSize + cellSize / 2;
-    const cy = y * cellSize + cellSize / 2;
-    
-    // Render the SVG icon
-    return portalSvgIcons[iconIndex](cellSize, cx, cy, theme);
-  };
-  
   return (
     <div className={styles.container} data-print-container="true">
       <div className={styles.mazeWrapper}>
@@ -424,126 +194,20 @@ const MazeGrid: React.FC<MazeGridProps> = memo(({
           
           {/* Draw the solution path if it's visible */}
           {showSolution && solutionPath.length > 1 && (
-            <g className={styles.solutionPath}>
-              {/* Draw path segments with appropriate colors */}
-              {solutionPath.map((point, index) => {
-                // Skip the last point as it won't have a "next" point to draw a line to
-                if (index === solutionPath.length - 1) return null;
-                
-                const [x, y] = point;
-                const [nextX, nextY] = solutionPath[index + 1];
-                
-                // Check if this segment involves teleportation (portal)
-                const isTeleport = hasPortal(mazeData, x, y) && 
-                  (() => {
-                    const portalPair = getPortalPair(mazeData, x, y);
-                    return portalPair && portalPair[0] === nextX && portalPair[1] === nextY;
-                  })();
-                
-                const startX = x * cellSize + cellSize / 2;
-                const startY = y * cellSize + cellSize / 2;
-                const endX = nextX * cellSize + cellSize / 2;
-                const endY = nextY * cellSize + cellSize / 2;
-                
-                return (
-                  <line
-                    key={`path-segment-${index}`}
-                    x1={startX}
-                    y1={startY}
-                    x2={endX}
-                    y2={endY}
-                    stroke={isTeleport 
-                      ? (theme === 'dungeon' ? '#e879f9' : '#8b5cf6') // Purple for teleport
-                      : (theme === 'dungeon' ? '#fbbf24' : '#60a5fa') // Regular path color
-                    }
-                    strokeWidth={cellSize * 0.25}
-                    strokeLinecap="round"
-                    strokeDasharray={isTeleport ? '0' : cellSize * 0.5}
-                    strokeOpacity={isTeleport ? 1 : 0.8}
-                  />
-                );
-              })}
-              
-              {/* Add dots at each waypoint */}
-              {solutionPath.map((point, index) => {
-                // Skip first and last points (start and end points)
-                if (index === 0 || index === solutionPath.length - 1) return null;
-                
-                const [x, y] = point;
-                const pathX = x * cellSize + cellSize / 2;
-                const pathY = y * cellSize + cellSize / 2;
-                
-                // Check if this point is on a portal
-                const isPortal = hasPortal(mazeData, x, y);
-                
-                return (
-                  <circle
-                    key={`solution-point-${index}`}
-                    cx={pathX}
-                    cy={pathY}
-                    r={cellSize * 0.15}
-                    fill={isPortal 
-                      ? (theme === 'dungeon' ? '#e879f9' : '#8b5cf6') // Purple for portal points
-                      : (theme === 'dungeon' ? '#fbbf24' : '#60a5fa') // Regular path color
-                    }
-                    strokeWidth="0"
-                  />
-                );
-              })}
-            </g>
+            <MazeSolutionPath 
+              solutionPath={solutionPath}
+              mazeData={mazeData}
+              cellSize={cellSize}
+              theme={theme}
+            />
           )}
           
-          {/* Draw the maze grid */}
-          {mazeData.map((row, y) => (
-            row.map((cell, x) => (
-              <g key={`${x}-${y}`} className={styles.cell}>
-                {/* Draw walls */}
-                {cell.walls[0] && (
-                  <line 
-                    className={styles.wall}
-                    x1={x * cellSize} 
-                    y1={y * cellSize} 
-                    x2={(x + 1) * cellSize} 
-                    y2={y * cellSize} 
-                    stroke={colors.wall}
-                  />
-                )}
-                {cell.walls[1] && (
-                  <line 
-                    className={styles.wall}
-                    x1={(x + 1) * cellSize} 
-                    y1={y * cellSize} 
-                    x2={(x + 1) * cellSize} 
-                    y2={(y + 1) * cellSize} 
-                    stroke={colors.wall}
-                  />
-                )}
-                {cell.walls[2] && (
-                  <line 
-                    className={styles.wall}
-                    x1={x * cellSize} 
-                    y1={(y + 1) * cellSize} 
-                    x2={(x + 1) * cellSize} 
-                    y2={(y + 1) * cellSize} 
-                    stroke={colors.wall}
-                  />
-                )}
-                {cell.walls[3] && (
-                  <line 
-                    className={styles.wall}
-                    x1={x * cellSize} 
-                    y1={y * cellSize} 
-                    x2={x * cellSize} 
-                    y2={(y + 1) * cellSize} 
-                    stroke={colors.wall}
-                  />
-                )}
-                
-                {/* Draw portal icons */}
-                {cell.portal && renderPortalIcon(cell, x, y)}
-              </g>
-            ))
-          ))}
+          {/* Draw the maze cells and walls */}
+          <MazeCells 
+            mazeData={mazeData}
+            cellSize={cellSize}
+            theme={theme}
+          />
           
           {/* Start point (top-left) with custom SVG */}
           {startPointSvg(
@@ -566,10 +230,6 @@ const MazeGrid: React.FC<MazeGridProps> = memo(({
           <span className={styles.mazeSizeInfo}>
             {width}x{height} maze
           </span>
-          
-          {/* Remove the portal instructions tooltip */}
-          
-          {/* Solve button - hidden when printing, repositioned for visibility */}
         </div>
         
         {/* Solve button - positioned outside mazeInfo for better visibility */}
