@@ -4,11 +4,12 @@ import { useState, useCallback, useEffect } from 'react';
 import MazeGrid from '@/components/MazeGrid/MazeGrid';
 import ControlPanel from '@/components/ControlPanel/ControlPanel';
 import { generateMazeWithPortals } from '@/lib/maze';
-import { Cell, MazeSize, SIZE_CONFIGS } from '@/lib/maze/types';
+import { Cell, MazeSize } from '@/lib/maze/types';
 
 export default function Home() {
   const [mazeData, setMazeData] = useState<Cell[][]>([]);
-  const [pathData, setPathData] = useState<[number, number][]>([]);
+  // Path data currently not being used in the UI
+  const [, setPathData] = useState<[number, number][]>([]);
   const [selectedSize, setSelectedSize] = useState<MazeSize>('M');
   const [portalPairs, setPortalPairs] = useState<number>(2);
   const [isGenerating, setIsGenerating] = useState(false);

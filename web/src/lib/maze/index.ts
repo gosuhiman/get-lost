@@ -1,5 +1,5 @@
 import { Cell, MazeSize, SIZE_CONFIGS } from './types';
-import { generateMaze, generateSectionedMaze, findSectionDeadEnds } from './generator';
+import { generateMaze, generateSectionedMaze } from './generator';
 import { addPortals, addPortalsToSections, hasPortal, getPortalPair } from './portals';
 
 /**

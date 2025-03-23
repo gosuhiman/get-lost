@@ -163,7 +163,7 @@ export function generateSectionedMaze(
   // Decide how to split the maze based on its dimensions
   const isHorizontalSplit = height >= width;
   
-  let sectionBoundaries: number[] = [];
+  const sectionBoundaries: number[] = [];
   
   if (isHorizontalSplit) {
     // Split horizontally (into rows)

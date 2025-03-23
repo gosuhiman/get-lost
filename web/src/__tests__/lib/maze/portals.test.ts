@@ -1,13 +1,14 @@
 import { addPortals, hasPortal, getPortalPair } from '@/lib/maze/portals';
 import { generateMaze } from '@/lib/maze/generator';
+import { Cell } from '@/lib/maze/types';
 
 // Helper to count walls around a cell
-function countWalls(maze: any[][], x: number, y: number): number {
+function countWalls(maze: Cell[][], x: number, y: number): number {
   return maze[y][x].walls.filter((wall: boolean) => wall).length;
 }
 
 // Helper function to find all cells reachable from a starting position without using portals
-function findReachableCells(maze: any[][], startX: number, startY: number): [number, number][] {
+function findReachableCells(maze: Cell[][], startX: number, startY: number): [number, number][] {
   const width = maze[0].length;
   const height = maze.length;
   const visited: boolean[][] = Array(height).fill(null).map(() => Array(width).fill(false));
