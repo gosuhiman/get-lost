@@ -108,13 +108,16 @@ button {
   }
   
   .print-focused {
+    position: absolute !important;
+    top: 0 !important;
+    left: 0 !important;
     width: 100% !important;
     height: 100% !important;
     margin: 0 !important;
     padding: 0 !important;
-    page-break-inside: avoid !important;
-    overflow: visible !important;
-    transform: scale(1) !important;
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
   }
   
   /* Ensure elements with data-print attributes fill the page */
@@ -137,4 +140,24 @@ button {
     min-width: unset !important;
     min-height: unset !important;
   }
+  
+  /* Full page maze styles */
+  .print-ready {
+    width: 100% !important;
+    height: 100% !important;
+    max-width: 100% !important;
+    max-height: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+  
+  /* Change portal colors for better black and white printing */
+  .safari .portal {
+    fill: white !important; /* Safari often has issues with printing yellow */
+  }
+}
+
+/* Class added to body during printing */
+body.printing {
+  overflow: hidden !important;
 }

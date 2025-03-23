@@ -3,34 +3,49 @@
 import { useState, useCallback, useEffect } from 'react';
 import MazeGrid from '@/components/MazeGrid/MazeGrid';
 import ControlPanel from '@/components/ControlPanel/ControlPanel';
-import { generateMaze } from '@/lib/maze/generator';
-import { addPortals } from '@/lib/maze/portals';
+import { generateMazeWithPortals } from '@/lib/maze';
 import { Cell, MazeSize, SIZE_CONFIGS } from '@/lib/maze/types';
 
 export default function Home() {
   const [mazeData, setMazeData] = useState<Cell[][]>([]);
+  const [pathData, setPathData] = useState<[number, number][]>([]);
   const [selectedSize, setSelectedSize] = useState<MazeSize>('M');
   const [portalPairs, setPortalPairs] = useState<number>(2);
   const [isGenerating, setIsGenerating] = useState(false);
   const [printReady, setPrintReady] = useState(false);
   const [initialLoad, setInitialLoad] = useState(true);
 
-  // Generate maze using the DFS algorithm and add portals
+  // Generate maze using our new method that creates sectioned maze with portals
   const handleGenerateMaze = useCallback(() => {
     setIsGenerating(true);
     
     // Use setTimeout to prevent UI blocking and allow loading state to render
     setTimeout(() => {
       try {
-        const { width, height } = SIZE_CONFIGS[selectedSize];
-        const newMaze = generateMaze(width, height);
+        console.log(`Generating maze with size ${selectedSize} and ${portalPairs} portal pairs`);
         
-        // Add portal pairs if requested
-        const mazeWithPortals = portalPairs > 0 
-          ? addPortals(newMaze, portalPairs) 
-          : newMaze;
-          
-        setMazeData(mazeWithPortals);
+        // Use our new sectioned maze generator with portals
+        const { maze, path } = generateMazeWithPortals(selectedSize, portalPairs);
+        
+        // Debug: Check if portals are being created
+        let portalCount = 0;
+        for (let y = 0; y < maze.length; y++) {
+          for (let x = 0; x < maze[0].length; x++) {
+            if (maze[y][x].portal) {
+              portalCount++;
+              const portal = maze[y][x].portal;
+              console.log(`Portal found at ${x},${y} with ID ${portal?.id} and pairIndex ${portal?.pairIndex}`);
+            }
+          }
+        }
+        console.log(`Total portals created: ${portalCount}`);
+        
+        setMazeData(maze);
+        setPathData(path);
+        
+        if (initialLoad) {
+          setInitialLoad(false);
+        }
       } catch (err) {
         // Silent error handling in production
         console.error("Error generating maze:", err);
@@ -38,7 +53,7 @@ export default function Home() {
         setIsGenerating(false);
       }
     }, 10);
-  }, [selectedSize, portalPairs]);
+  }, [selectedSize, portalPairs, initialLoad]);
 
   // Handle size change
   const handleSizeChange = useCallback((size: MazeSize) => {
@@ -95,10 +110,9 @@ export default function Home() {
     }, 300);
   }, []);
 
-  // Generate a default maze on first load
+  // Generate a maze on initial load
   useEffect(() => {
     if (initialLoad) {
-      setInitialLoad(false);
       handleGenerateMaze();
     }
     
@@ -110,34 +124,32 @@ export default function Home() {
   }, [initialLoad, handleGenerateMaze]);
 
   return (
-    <div className={`min-h-screen flex flex-col ${printReady ? 'p-0' : 'p-2 md:p-4'} gap-4`}>
-      <header className="text-center no-print mb-2">
-        <h1 className="text-3xl font-bold mt-2">Get Lost!</h1>
-        <p className="text-lg mb-3">
-          Generate, solve, and print mazes with portals of various sizes
-        </p>
-      </header>
-
-      <main className="flex flex-col items-center gap-4 flex-grow">
-        {/* Maze Grid */}
-        <div className={`${printReady ? 'print-focused' : ''} w-full flex justify-center flex-grow`}>
-          <MazeGrid mazeData={mazeData} />
-        </div>
-
-        {/* Control Panel */}
-        <div className="no-print w-full max-w-2xl mt-2 mb-4">
-          <ControlPanel
-            selectedSize={selectedSize}
-            portalPairs={portalPairs}
-            onSizeChange={handleSizeChange}
-            onPortalPairsChange={handlePortalPairsChange}
-            onGenerate={handleGenerateMaze}
-            onPrint={handlePrint}
-            isGenerating={isGenerating}
-            hasMaze={mazeData.length > 0}
+    <main className={`flex min-h-screen flex-col items-center ${printReady ? 'p-0' : 'p-4 sm:p-12'}`}>
+      <div className={`z-10 w-full flex flex-col items-center ${printReady ? 'print-focused' : ''}`}>
+        <h1 className={`text-3xl font-bold mb-6 ${printReady ? 'no-print' : ''}`}>Get Lost - Maze Generator</h1>
+        
+        <ControlPanel
+          selectedSize={selectedSize}
+          portalPairs={portalPairs}
+          onSizeChange={handleSizeChange}
+          onPortalPairsChange={handlePortalPairsChange}
+          onGenerate={handleGenerateMaze}
+          isGenerating={isGenerating}
+          onPrint={handlePrint}
+          hasMaze={mazeData.length > 0}
+        />
+        
+        <div className={`mt-4 ${printReady ? 'print-ready' : ''}`}>
+          <MazeGrid 
+            mazeData={mazeData}
+            cellSize={10}
           />
         </div>
-      </main>
-    </div>
+        
+        <p className={`text-sm text-gray-500 mt-4 ${printReady ? 'no-print' : ''}`}>
+          Randomly generated maze with {portalPairs} portal pair{portalPairs !== 1 ? 's' : ''}.
+        </p>
+      </div>
+    </main>
   );
 }

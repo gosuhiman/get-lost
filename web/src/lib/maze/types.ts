@@ -1,6 +1,7 @@
 export interface Cell {
   walls: [boolean, boolean, boolean, boolean]; // N,E,S,W
   visited: boolean;
+  sectionId?: number; // To identify which isolated section this cell belongs to
   portal?: {
     id: number;      // Unique identifier for the portal pair
     pairIndex: number; // Index of the paired portal cell (0 or 1)

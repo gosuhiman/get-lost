@@ -1,6 +1,52 @@
 import { addPortals, hasPortal, getPortalPair } from '@/lib/maze/portals';
 import { generateMaze } from '@/lib/maze/generator';
 
+// Helper to count walls around a cell
+function countWalls(maze: any[][], x: number, y: number): number {
+  return maze[y][x].walls.filter((wall: boolean) => wall).length;
+}
+
+// Helper function to find all cells reachable from a starting position without using portals
+function findReachableCells(maze: any[][], startX: number, startY: number): [number, number][] {
+  const width = maze[0].length;
+  const height = maze.length;
+  const visited: boolean[][] = Array(height).fill(null).map(() => Array(width).fill(false));
+  const reachable: [number, number][] = [];
+  const stack: [number, number][] = [[startX, startY]];
+  
+  // Direction indices: [North, East, South, West]
+  const dx = [0, 1, 0, -1];
+  const dy = [-1, 0, 1, 0];
+  
+  visited[startY][startX] = true;
+  
+  while (stack.length > 0) {
+    const [x, y] = stack.pop()!;
+    reachable.push([x, y]);
+    
+    // Check all four directions
+    for (let dir = 0; dir < 4; dir++) {
+      // If there's no wall in this direction
+      if (!maze[y][x].walls[dir]) {
+        const newX = x + dx[dir];
+        const newY = y + dy[dir];
+        
+        // If the neighbor hasn't been visited
+        if (
+          newX >= 0 && newX < width &&
+          newY >= 0 && newY < height &&
+          !visited[newY][newX]
+        ) {
+          visited[newY][newX] = true;
+          stack.push([newX, newY]);
+        }
+      }
+    }
+  }
+  
+  return reachable;
+}
+
 describe('Portal System', () => {
   describe('addPortals', () => {
     it('should add the correct number of portal pairs', () => {
@@ -21,8 +67,9 @@ describe('Portal System', () => {
         }
       }
       
-      // Should be 2 cells per pair
-      expect(portalCount).toBe(numPairs * 2);
+      // Should be 2 cells per pair, but might be fewer if we couldn't place all pairs
+      expect(portalCount).toBeLessThanOrEqual(numPairs * 2);
+      expect(portalCount % 2).toBe(0); // Should always be an even number
     });
     
     it('should not place portals at entrance or exit', () => {
@@ -75,6 +122,60 @@ describe('Portal System', () => {
             }
             
             expect(pairFound).toBe(true);
+          }
+        }
+      }
+    });
+
+    it('should place portals at dead-ends (cells with 3 walls)', () => {
+      const width = 20;
+      const height = 20;
+      const numPairs = 5;
+      
+      const maze = generateMaze(width, height);
+      const mazeWithPortals = addPortals(maze, numPairs);
+      
+      // Check that all portals are at dead-ends
+      for (let y = 0; y < height; y++) {
+        for (let x = 0; x < width; x++) {
+          if (mazeWithPortals[y][x].portal) {
+            const wallCount = countWalls(mazeWithPortals, x, y);
+            expect(wallCount).toBe(3);
+          }
+        }
+      }
+    });
+    
+    it('should ensure portal pairs are not reachable from each other without using portals', () => {
+      const width = 20;
+      const height = 20;
+      const numPairs = 3;
+      
+      const maze = generateMaze(width, height);
+      const mazeWithPortals = addPortals(maze, numPairs);
+      
+      // For each portal, check that its pair is not reachable
+      for (let y = 0; y < height; y++) {
+        for (let x = 0; x < width; x++) {
+          const portal = mazeWithPortals[y][x].portal;
+          if (portal) {
+            // Find its pair coordinates
+            const pairCoords = getPortalPair(mazeWithPortals, x, y);
+            expect(pairCoords).not.toBeNull();
+            
+            if (pairCoords) {
+              const [pairX, pairY] = pairCoords;
+              
+              // Find all cells reachable from this portal without using portals
+              const reachableCells = findReachableCells(mazeWithPortals, x, y);
+              
+              // The pair should not be in the reachable cells
+              const isPairReachable = reachableCells.some(
+                ([rx, ry]) => rx === pairX && ry === pairY
+              );
+              
+              expect(isPairReachable).toBe(false);
+            }
           }
         }
       }

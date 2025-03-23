@@ -42,15 +42,16 @@
 }
 
 .portal {
-  fill: white;
+  fill: yellow;
   stroke: black;
-  stroke-width: 0.8;
+  stroke-width: 1.2;
 }
 
 .portalText {
   font-family: Arial, sans-serif;
   font-weight: bold;
   user-select: none;
+  font-size: 4px;
 }
 
 @media print {

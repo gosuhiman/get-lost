@@ -1,6 +1,6 @@
 'use client';
 
-import React, { memo } from 'react';
+import React, { memo, useEffect } from 'react';
 import { Cell } from '@/lib/maze/types';
 import styles from './styles.module.css';
 
@@ -13,6 +13,21 @@ const MazeGrid: React.FC<MazeGridProps> = memo(({
   mazeData, 
   cellSize = 10 
 }) => {
+  // Debug: Check if maze data contains portals
+  useEffect(() => {
+    if (mazeData && mazeData.length) {
+      let portalCount = 0;
+      for (let y = 0; y < mazeData.length; y++) {
+        for (let x = 0; x < mazeData[0].length; x++) {
+          if (mazeData[y][x].portal) {
+            portalCount++;
+          }
+        }
+      }
+      console.log(`MazeGrid received ${portalCount} portals`);
+    }
+  }, [mazeData]);
+
   if (!mazeData || !mazeData.length) {
     return (
       <div className={styles.container}>
@@ -124,13 +139,14 @@ const MazeGrid: React.FC<MazeGridProps> = memo(({
                     cy={y * cellSize + cellSize / 2} 
                     r={cellSize / 3} 
                     stroke="black"
-                    strokeWidth="0.8"
-                    fill="white"
+                    strokeWidth="1.2"
+                    fill="yellow"
                   />
                   <text 
                     x={x * cellSize + cellSize / 2} 
                     y={y * cellSize + cellSize / 2 + cellSize / 12} 
-                    fontSize={cellSize / 3}
+                    fontSize={cellSize / 2.5}
+                    fontWeight="bold"
                     textAnchor="middle" 
                     dominantBaseline="middle"
                     fill="black"

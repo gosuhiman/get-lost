@@ -47,7 +47,7 @@ function generateMaze(width: number, height: number): Cell[][] {
 }
 
 function addPortals(maze: Cell[][], numPairs: number = 2): Cell[][] {
-  // Randomly place portal pairs throughout the maze
+  // Strategically place portal pairs throughout the maze
   // Returns updated maze with portal data
 }
 ```
@@ -85,13 +85,18 @@ const [portalPairs, setPortalPairs] = useState<number>(2); // Number of portal p
   - Portal pairs share the same ID but have different indices
   - Print-friendly visual indicators for paired portals (numbered labels)
   - Portals cannot be placed on entrance or exit cells
+  - Portals must be placed at dead-ends (cells with walls on 3 sides)
+  - Portal pairs must be in separate, disconnected sections of the maze
+  - Users must use portals to travel between these sections
+  - Each portal effectively acts as a teleporting dead-end
 
 ```typescript
-function placePortalPairs(maze: Cell[][], numPairs: number): void {
+function addPortals(maze: Cell[][], numPairs: number): Cell[][] {
   // For each pair:
-  // 1. Select two random accessible cells
-  // 2. Assign matching portal IDs with different pair indices
-  // 3. Ensure no overlapping portal placements
+  // 1. Find dead-end cells (cells with 3 walls)
+  // 2. For each potential first portal, find a second portal that is not reachable from the first
+  // 3. Assign matching portal IDs with different pair indices
+  // 4. Ensure portals are in disconnected sections of the maze
 }
 ```
 
@@ -131,9 +136,10 @@ Implement DFS with:
     
 2. **Portal System**
 Implement portal generation:
-    - Random placement algorithm
-    - Pair linking logic
-    - Validation to ensure proper placement
+    - Place portals at dead-ends (cells with 3 walls)
+    - Ensure portal pairs are in disconnected maze sections
+    - Implement validation to prevent portals being reachable from each other
+    - Force users to use portals to navigate between maze sections
 
 3. **SVG Component**
 
@@ -183,6 +189,8 @@ Implement portal generation:
     - Complete path existence verification
     - No isolated cells check
     - Portal pair connectivity validation
+    - Dead-end placement verification for portals
+    - Isolated section verification for portal pairs
 2. Cypress E2E tests for:
     - Generation button workflow
     - Print dialog triggering
