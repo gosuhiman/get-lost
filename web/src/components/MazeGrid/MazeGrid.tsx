@@ -9,6 +9,128 @@ interface MazeGridProps {
   cellSize?: number;
 }
 
+// SVG definitions for portal icons (5 unique designs)
+const portalSvgIcons = [
+  // Portal 1 - Spiral design
+  (size: number, cx: number, cy: number, id: number) => (
+    <g className={styles.portalSvg}>
+      <path 
+        d={`M ${cx} ${cy} 
+           m ${-size * 0.35} 0 
+           a ${size * 0.35} ${size * 0.35} 0 1 1 ${size * 0.7} 0 
+           a ${size * 0.35} ${size * 0.35} 0 1 1 ${-size * 0.7} 0`} 
+        fill="none" 
+        stroke="#6366f1" 
+        strokeWidth={size * 0.15} 
+      />
+    </g>
+  ),
+  // Portal 2 - Star design
+  (size: number, cx: number, cy: number, id: number) => {
+    const points = 5;
+    const outerRadius = size * 0.4;
+    const innerRadius = size * 0.2;
+    let pathData = "";
+    
+    for (let i = 0; i < points * 2; i++) {
+      const radius = i % 2 ? innerRadius : outerRadius;
+      const angle = (Math.PI / points) * i;
+      const x = cx + radius * Math.sin(angle);
+      const y = cy - radius * Math.cos(angle);
+      
+      if (i === 0) pathData += `M ${x} ${y} `;
+      else pathData += `L ${x} ${y} `;
+    }
+    pathData += "Z";
+    
+    return (
+      <g className={styles.portalSvg}>
+        <path d={pathData} fill="#f59e0b" stroke="#c2410c" strokeWidth="1.5" />
+      </g>
+    );
+  },
+  // Portal 3 - Hexagon design
+  (size: number, cx: number, cy: number, id: number) => {
+    const points = 6;
+    const radius = size * 0.35;
+    let pathData = "";
+    
+    for (let i = 0; i < points; i++) {
+      const angle = (Math.PI * 2 / points) * i;
+      const x = cx + radius * Math.cos(angle);
+      const y = cy + radius * Math.sin(angle);
+      
+      if (i === 0) pathData += `M ${x} ${y} `;
+      else pathData += `L ${x} ${y} `;
+    }
+    pathData += "Z";
+    
+    return (
+      <g className={styles.portalSvg}>
+        <path d={pathData} fill="#10b981" stroke="#047857" strokeWidth="1.5" />
+      </g>
+    );
+  },
+  // Portal 4 - Diamond design
+  (size: number, cx: number, cy: number, id: number) => (
+    <g className={styles.portalSvg}>
+      <rect 
+        x={cx - size * 0.35} 
+        y={cy - size * 0.35}
+        width={size * 0.7}
+        height={size * 0.7}
+        fill="#ec4899"
+        stroke="#be185d"
+        strokeWidth="1.5"
+        transform={`rotate(45 ${cx} ${cy})`}
+      />
+    </g>
+  ),
+  // Portal 5 - Concentric circles design
+  (size: number, cx: number, cy: number, id: number) => (
+    <g className={styles.portalSvg}>
+      <circle cx={cx} cy={cy} r={size * 0.35} fill="#3b82f6" stroke="#1d4ed8" strokeWidth="1.5" />
+      <circle cx={cx} cy={cy} r={size * 0.20} fill="none" stroke="white" strokeWidth="1.5" />
+    </g>
+  )
+];
+
+// SVG definitions for start and end points
+const startPointSvg = (cx: number, cy: number, size: number) => (
+  <g className={styles.startPointGroup}>
+    <path 
+      d={`M ${cx - size * 0.35} ${cy}
+         L ${cx + size * 0.35} ${cy - size * 0.35}
+         L ${cx + size * 0.35} ${cy + size * 0.35}
+         Z`} 
+      className={styles.startPoint}
+    />
+  </g>
+);
+
+const endPointSvg = (cx: number, cy: number, size: number) => (
+  <g className={styles.endPointGroup}>
+    <path
+      d={`M ${cx - size * 0.35} ${cy - size * 0.35}
+         L ${cx + size * 0.35} ${cy - size * 0.35}
+         L ${cx + size * 0.35} ${cy + size * 0.35}
+         L ${cx - size * 0.35} ${cy + size * 0.35}
+         Z`}
+      className={styles.endPoint}
+    />
+    <path
+      d={`M ${cx - size * 0.15} ${cy - size * 0.15}
+         L ${cx + size * 0.15} ${cy - size * 0.15}
+         L ${cx + size * 0.15} ${cy + size * 0.15}
+         L ${cx - size * 0.15} ${cy + size * 0.15}
+         Z`}
+      fill="white"
+      stroke="#8e0000"
+      strokeWidth="1"
+    />
+  </g>
+);
+
 const MazeGrid: React.FC<MazeGridProps> = memo(({ 
   mazeData, 
   cellSize = 10 
@@ -82,6 +204,22 @@ const MazeGrid: React.FC<MazeGridProps> = memo(({
   const endX = width - 1;
   const endY = height - 1;
   
+  // Function to render the appropriate portal icon based on ID
+  const renderPortalIcon = (cell: Cell, x: number, y: number) => {
+    if (!cell.portal) return null;
+    
+    // Get the portal ID and use it to determine which icon to use (modulo the number of available icons)
+    const portalId = cell.portal.id;
+    const iconIndex = (portalId - 1) % portalSvgIcons.length;
+    
+    // Calculate the center position
+    const cx = x * cellSize + cellSize / 2;
+    const cy = y * cellSize + cellSize / 2;
+    
+    // Render the SVG icon
+    return portalSvgIcons[iconIndex](cellSize, cx, cy, portalId);
+  };
+  
   return (
     <div className={styles.container} data-print-container="true">
       <div className={styles.mazeWrapper}>
@@ -154,79 +292,25 @@ const MazeGrid: React.FC<MazeGridProps> = memo(({
                   />
                 )}
                 
-                {/* Draw portal indicators */}
-                {cell.portal && (
-                  <>
-                    <circle 
-                      className={styles.portal}
-                      cx={x * cellSize + cellSize / 2} 
-                      cy={y * cellSize + cellSize / 2} 
-                      r={cellSize / 3} 
-                      stroke="black"
-                      strokeWidth="1.2"
-                      fill="yellow"
-                    />
-                    <text 
-                      x={x * cellSize + cellSize / 2} 
-                      y={y * cellSize + cellSize / 2 + cellSize / 12} 
-                      fontSize={cellSize / 2.5}
-                      fontWeight="bold"
-                      textAnchor="middle" 
-                      dominantBaseline="middle"
-                      fill="black"
-                      className={styles.portalText}
-                    >
-                      {cell.portal.id}
-                    </text>
-                  </>
-                )}
+                {/* Draw portal icons */}
+                {cell.portal && renderPortalIcon(cell, x, y)}
               </g>
             ))
           )}
           
-          {/* Start point (top-left) with label */}
-          <g className={styles.startPointGroup}>
-            <circle 
-              className={styles.startPoint}
-              cx={startX * cellSize + cellSize / 2} 
-              cy={startY * cellSize + cellSize / 2} 
-              r={cellSize / 3} 
-            />
-            <text
-              x={startX * cellSize + cellSize / 2}
-              y={startY * cellSize + cellSize / 2}
-              fontSize={cellSize / 2.5}
-              fontWeight="bold"
-              textAnchor="middle"
-              dominantBaseline="middle"
-              fill="white"
-              className={styles.startEndText}
-            >
-              S
-            </text>
-          </g>
+          {/* Start point (top-left) with custom SVG */}
+          {startPointSvg(
+            startX * cellSize + cellSize / 2,
+            startY * cellSize + cellSize / 2,
+            cellSize
+          )}
           
-          {/* End point (bottom-right) with label */}
-          <g className={styles.endPointGroup}>
-            <circle 
-              className={styles.endPoint}
-              cx={endX * cellSize + cellSize / 2} 
-              cy={endY * cellSize + cellSize / 2} 
-              r={cellSize / 3} 
-            />
-            <text
-              x={endX * cellSize + cellSize / 2}
-              y={endY * cellSize + cellSize / 2}
-              fontSize={cellSize / 2.5}
-              fontWeight="bold"
-              textAnchor="middle"
-              dominantBaseline="middle"
-              fill="white"
-              className={styles.startEndText}
-            >
-              E
-            </text>
-          </g>
+          {/* End point (bottom-right) with custom SVG */}
+          {endPointSvg(
+            endX * cellSize + cellSize / 2,
+            endY * cellSize + cellSize / 2,
+            cellSize
+          )}
         </svg>
         
         <div className={styles.mazeInfo}>

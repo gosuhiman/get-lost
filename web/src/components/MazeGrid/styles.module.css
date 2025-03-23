@@ -81,6 +81,7 @@
 .startPointGroup, .endPointGroup {
   cursor: pointer;
   transition: transform 0.2s ease;
+  filter: drop-shadow(0 2px 3px rgba(0, 0, 0, 0.3));
 }
 
 .startPointGroup:hover, .endPointGroup:hover {
@@ -90,41 +91,31 @@
 .startPoint {
   fill: #2e7d32;
   stroke: #1b5e20;
-  stroke-width: 0.5;
-  filter: drop-shadow(0 2px 3px rgba(0, 0, 0, 0.3));
+  stroke-width: 1.5;
 }
 
 .endPoint {
   fill: #c62828;
   stroke: #8e0000;
-  stroke-width: 0.5;
-  filter: drop-shadow(0 2px 3px rgba(0, 0, 0, 0.3));
-}
-
-.startEndText {
-  font-family: Arial, sans-serif;
-  font-weight: bold;
-  user-select: none;
+  stroke-width: 1.5;
 }
 
 .portal {
-  fill: #ffd700;
+  fill: white;
   stroke: black;
-  stroke-width: 1.2;
+  stroke-width: 1;
   filter: drop-shadow(0 2px 3px rgba(0, 0, 0, 0.2));
   transition: transform 0.2s ease;
 }
 
-g:hover .portal {
-  transform: scale(1.1);
+.portalSvg {
+  filter: drop-shadow(0 2px 3px rgba(0, 0, 0, 0.2));
+  transition: transform 0.2s ease;
 }
 
-.portalText {
-  font-family: Arial, sans-serif;
-  font-weight: bold;
-  user-select: none;
-  font-size: 4px;
-  pointer-events: none;
+g:hover .portal,
+g:hover .portalSvg {
+  transform: scale(1.1);
 }
 
 .mazeInfo {
@@ -160,7 +151,7 @@ g:hover .portal {
 @media (min-width: 1280px) {
   .mazeGrid {
     max-width: 1200px;
-    transition: transform 0.3s ease;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
   }
   
   .mazeGrid:hover {
@@ -254,8 +245,12 @@ g:hover .portal {
     stroke-width: 1 !important;
   }
   
-  .portalText, .startEndText {
-    font-size: smaller !important;
+  .portal,
+  .portalSvg {
+    fill: white !important;
+    stroke: black !important;
+    stroke-width: 0.75 !important;
+    filter: none !important;
   }
   
   .mazeInfo {

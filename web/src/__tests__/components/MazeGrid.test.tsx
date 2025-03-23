@@ -90,22 +90,22 @@ describe('MazeGrid Component', () => {
     expect(wallElements.length).toBe(expectedWallCount);
   });
   
-  it('renders start and end points with labels', () => {
+  it('renders start and end points', () => {
     const mazeData = createTestMaze(5, 5);
     
     const { container } = render(<MazeGrid mazeData={mazeData} />);
     
-    // There should be start and end circles
-    const startPoint = container.querySelector('.startPoint');
-    const endPoint = container.querySelector('.endPoint');
+    // There should be start and end elements
+    const startPointGroup = container.querySelector('.startPointGroup');
+    const endPointGroup = container.querySelector('.endPointGroup');
+    expect(startPointGroup).toBeInTheDocument();
+    expect(endPointGroup).toBeInTheDocument();
+    
+    // Check for start and end paths (no longer text labels)
+    const startPoint = startPointGroup?.querySelector('path');
+    const endPoint = endPointGroup?.querySelector('path');
     expect(startPoint).toBeInTheDocument();
     expect(endPoint).toBeInTheDocument();
-    
-    // Check for start and end labels
-    const startLabel = screen.getByText('S');
-    const endLabel = screen.getByText('E');
-    expect(startLabel).toBeInTheDocument();
-    expect(endLabel).toBeInTheDocument();
   });
   
   it('renders portal indicators correctly', () => {
@@ -113,14 +113,14 @@ describe('MazeGrid Component', () => {
     
     const { container } = render(<MazeGrid mazeData={mazeData} />);
     
-    // Find portal circles
-    const portalElements = container.querySelectorAll('.portal');
+    // Find portal SVG elements
+    const portalElements = container.querySelectorAll('.portalSvg');
     expect(portalElements.length).toBe(2);
     
-    // Find portal text elements (excluding S and E labels)
+    // No portal text elements anymore
     const portalTexts = Array.from(container.querySelectorAll('text'))
       .filter(el => el.textContent === '1');
-    expect(portalTexts.length).toBe(2);
+    expect(portalTexts.length).toBe(0);
   });
   
   it('applies the correct viewBox based on maze dimensions', () => {
