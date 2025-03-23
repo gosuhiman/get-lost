@@ -29,16 +29,5 @@
     "ts-jest": "^29.1.2",
     "@types/jest": "^29.5.12",
     "jest-environment-jsdom": "^29.7.0"
-  },
-  "jest": {
-    "preset": "ts-jest",
-    "testEnvironment": "jsdom",
-    "moduleNameMapper": {
-      "^@/(.*)$": "<rootDir>/src/$1"
-    },
-    "transform": {
-      "^.+\\.(ts|tsx)$": ["ts-jest", { "tsconfig": "tsconfig.json" }]
-    },
-    "testMatch": ["**/__tests__/**/*.test.(ts|tsx)"]
   }
 }
