@@ -27,7 +27,7 @@ describe('Maze Generator', () => {
     it('should create a connected path through the maze', () => {
       const width = 10;
       const height = 10;
-      const maze = generateMaze(width, height);
+      const maze = generateMaze({ width, height });
       
       // Test a complete path exists by checking if all cells are reachable from the start
       // We'll use a simple flood fill algorithm to verify
@@ -70,7 +70,7 @@ describe('Maze Generator', () => {
     it('should have no isolated cells', () => {
       const width = 8;
       const height = 8;
-      const maze = generateMaze(width, height);
+      const maze = generateMaze({ width, height });
       
       // Every cell should have at least one open wall
       for (let y = 0; y < height; y++) {
@@ -84,7 +84,7 @@ describe('Maze Generator', () => {
     it('should have consistent walls between adjacent cells', () => {
       const width = 5;
       const height = 5;
-      const maze = generateMaze(width, height);
+      const maze = generateMaze({ width, height });
       
       // Directions: [N, E, S, W]
       const dx = [0, 1, 0, -1];

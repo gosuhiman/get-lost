@@ -217,31 +217,70 @@ export function addPortals(maze: Cell[][], numPairs: number = 2): Cell[][] {
   // Create a deep copy of the maze to avoid modifying the original
   const mazeCopy: Cell[][] = JSON.parse(JSON.stringify(maze));
   
-  // Create a list of valid cells (not entrance or exit)
-  const validCells: [number, number][] = [];
+  // Find all dead-end cells (cells with 3 walls)
+  const deadEnds: [number, number][] = [];
   for (let y = 0; y < height; y++) {
     for (let x = 0; x < width; x++) {
       // Skip entrance (0,0) and exit (last cell)
       if ((x === 0 && y === 0) || (x === width - 1 && y === height - 1)) {
         continue;
       }
-      validCells.push([x, y]);
+      
+      if (isDeadEnd(mazeCopy, x, y)) {
+        deadEnds.push([x, y]);
+      }
     }
   }
   
-  // Shuffle the valid cells to select random locations
-  for (let i = validCells.length - 1; i > 0; i--) {
+  // Shuffle the dead ends to select random locations
+  for (let i = deadEnds.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
-    [validCells[i], validCells[j]] = [validCells[j], validCells[i]];
+    [deadEnds[i], deadEnds[j]] = [deadEnds[j], deadEnds[i]];
   }
   
   // Place portal pairs
-  for (let i = 0; i < numPairs && i * 2 + 1 < validCells.length; i++) {
-    const portalId = i + 1; // Portal IDs start at 1
+  let pairsPlaced = 0;
+  const usedPositions = new Set<string>();
+  
+  // Try to place pairs until we've placed the requested number or run out of valid positions
+  while (pairsPlaced < numPairs && deadEnds.length >= 2) {
+    // Select a dead end for the first portal in the pair
+    const pos1 = deadEnds.shift()!;
+    const key1 = `${pos1[0]},${pos1[1]}`;
+    usedPositions.add(key1);
     
-    // Get two random cells for this pair
-    const pos1 = validCells[i * 2];
-    const pos2 = validCells[i * 2 + 1];
+    // Find a valid position for the second portal
+    let validPos2Index = -1;
+    
+    // Look for a dead end that's not reachable from pos1
+    for (let i = 0; i < deadEnds.length; i++) {
+      const pos2 = deadEnds[i];
+      const key2 = `${pos2[0]},${pos2[1]}`;
+      
+      if (usedPositions.has(key2)) continue;
+      
+      // Check if pos2 is reachable from pos1 without using portals
+      const reachableCells = findReachableCells(mazeCopy, pos1[0], pos1[1]);
+      const isPairReachable = reachableCells.some(
+        ([rx, ry]) => rx === pos2[0] && ry === pos2[1]
+      );
+      
+      if (!isPairReachable) {
+        validPos2Index = i;
+        break;
+      }
+    }
+    
+    // If we didn't find a valid position, break out of the loop
+    if (validPos2Index === -1) break;
+    
+    // Get the valid position and mark it as used
+    const pos2 = deadEnds.splice(validPos2Index, 1)[0];
+    const key2 = `${pos2[0]},${pos2[1]}`;
+    usedPositions.add(key2);
+    
+    // Add the portal pair
+    const portalId = pairsPlaced + 1; // Portal IDs start at 1
     
     console.log(`Adding portal pair ${portalId} at (${pos1[0]},${pos1[1]}) and (${pos2[0]},${pos2[1]})`);
     
@@ -255,6 +294,8 @@ export function addPortals(maze: Cell[][], numPairs: number = 2): Cell[][] {
       id: portalId,
       pairIndex: 1
     };
+    
+    pairsPlaced++;
   }
   
   return mazeCopy;

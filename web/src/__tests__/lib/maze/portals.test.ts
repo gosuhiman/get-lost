@@ -54,7 +54,7 @@ describe('Portal System', () => {
       const height = 10;
       const numPairs = 3;
       
-      const maze = generateMaze(width, height);
+      const maze = generateMaze({ width, height });
       const mazeWithPortals = addPortals(maze, numPairs);
       
       // Count the number of portals
@@ -75,7 +75,7 @@ describe('Portal System', () => {
     it('should not place portals at entrance or exit', () => {
       const width = 8;
       const height = 8;
-      const maze = generateMaze(width, height);
+      const maze = generateMaze({ width, height });
       const mazeWithPortals = addPortals(maze, 5);
       
       // Check entrance (0,0)
@@ -90,7 +90,7 @@ describe('Portal System', () => {
       const height = 15;
       const numPairs = 4;
       
-      const maze = generateMaze(width, height);
+      const maze = generateMaze({ width, height });
       const mazeWithPortals = addPortals(maze, numPairs);
       
       // For each portal, find its pair and verify properties
@@ -132,7 +132,7 @@ describe('Portal System', () => {
       const height = 20;
       const numPairs = 5;
       
-      const maze = generateMaze(width, height);
+      const maze = generateMaze({ width, height });
       const mazeWithPortals = addPortals(maze, numPairs);
       
       // Check that all portals are at dead-ends
@@ -151,7 +151,7 @@ describe('Portal System', () => {
       const height = 20;
       const numPairs = 3;
       
-      const maze = generateMaze(width, height);
+      const maze = generateMaze({ width, height });
       const mazeWithPortals = addPortals(maze, numPairs);
       
       // For each portal, check that its pair is not reachable
@@ -186,7 +186,7 @@ describe('Portal System', () => {
     it('should correctly identify cells with portals', () => {
       const width = 10;
       const height = 10;
-      const maze = generateMaze(width, height);
+      const maze = generateMaze({ width, height });
       const mazeWithPortals = addPortals(maze, 2);
       
       for (let y = 0; y < height; y++) {
@@ -202,7 +202,7 @@ describe('Portal System', () => {
     it('should return null for cells without portals', () => {
       const width = 8;
       const height = 8;
-      const maze = generateMaze(width, height);
+      const maze = generateMaze({ width, height });
       const mazeWithPortals = addPortals(maze, 2);
       
       // Find a cell without a portal
@@ -225,7 +225,7 @@ describe('Portal System', () => {
     it('should correctly find portal pairs', () => {
       const width = 10;
       const height = 10;
-      const maze = generateMaze(width, height);
+      const maze = generateMaze({ width, height });
       const mazeWithPortals = addPortals(maze, 3);
       
       // For each portal, check that getPortalPair returns the correct coordinates

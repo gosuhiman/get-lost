@@ -9,9 +9,6 @@
   --danger: #dc3545;
   --light: #f8f9fa;
   --dark: #212529;
-}
-
-@theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --font-sans: var(--font-geist-sans);
