@@ -1,6 +1,10 @@
 export interface Cell {
   walls: [boolean, boolean, boolean, boolean]; // N,E,S,W
   visited: boolean;
+  portal?: {
+    id: number;      // Unique identifier for the portal pair
+    pairIndex: number; // Index of the paired portal cell (0 or 1)
+  };
 }
 
 export type MazeSize = 'S' | 'M' | 'L' | 'XL';
