@@ -3,12 +3,15 @@
 import React from 'react';
 import { MazeSize, SIZE_CONFIGS } from '@/lib/maze/types';
 import styles from './styles.module.css';
+import { MazeTheme } from '@/app/page';
 
 interface ControlPanelProps {
   selectedSize: MazeSize;
   portalPairs: number;
+  selectedTheme: MazeTheme;
   onSizeChange: (size: MazeSize) => void;
   onPortalPairsChange: (pairs: number) => void;
+  onThemeChange: (theme: MazeTheme) => void;
   onGenerate: () => void;
   onPrint: () => void;
   isGenerating: boolean;
@@ -18,8 +21,10 @@ interface ControlPanelProps {
 const ControlPanel: React.FC<ControlPanelProps> = ({
   selectedSize,
   portalPairs,
+  selectedTheme,
   onSizeChange,
   onPortalPairsChange,
+  onThemeChange,
   onGenerate,
   onPrint,
   isGenerating,
@@ -27,6 +32,10 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
 }) => {
   const sizeOptions: MazeSize[] = ['S', 'M', 'L', 'XL'];
   const portalOptions = [0, 1, 2, 3];
+  const themeOptions: { value: MazeTheme; label: string; icon: string }[] = [
+    { value: 'dungeon', label: 'Dungeon', icon: '🏰' },
+    { value: 'space', label: 'Space', icon: '🚀' }
+  ];
   
   return (
     <div className={styles.controlPanel}>
@@ -71,6 +80,30 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
         </p>
       </div>
       
+      <div className={styles.controlSection}>
+        <label className={styles.controlLabel}>Theme</label>
+        <div className={styles.themeSelector}>
+          {themeOptions.map((theme) => (
+            <button
+              key={theme.value}
+              className={`${styles.themeButton} ${selectedTheme === theme.value ? styles.themeButtonActive : ''}`}
+              onClick={() => onThemeChange(theme.value)}
+              disabled={isGenerating}
+              title={`${theme.label} theme`}
+            >
+              {theme.icon}
+              <span className={styles.themeLabel}>{theme.label}</span>
+            </button>
+          ))}
+        </div>
+        <p className={styles.helpText}>
+          {selectedTheme === 'space' ? 
+            "Space-themed maze with cosmic elements." : 
+            "Dungeon-themed maze with medieval elements."
+          }
+        </p>
+      </div>
+      
       <div className={styles.actionsSection}>
         <button
           className={styles.actionButton}
@@ -103,6 +136,10 @@ const ControlPanel: React.FC<ControlPanelProps> = ({
           <div className={styles.shortcut}>
             <kbd className={styles.key}>P</kbd>
             <span className={styles.shortcutDesc}>Print maze</span>
+          </div>
+          <div className={styles.shortcut}>
+            <kbd className={styles.key}>T</kbd>
+            <span className={styles.shortcutDesc}>Change theme</span>
           </div>
           <div className={styles.shortcut}>
             <kbd className={styles.key}>1-4</kbd>

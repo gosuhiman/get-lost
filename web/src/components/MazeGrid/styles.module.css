@@ -22,12 +22,26 @@
   width: 100%;
   height: auto;
   min-height: 500px;
-  background-color: #ffffff;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+  background-color: #44403c; /* Default to dungeon theme */
+  box-shadow: 0 8px 24px rgba(60, 40, 20, 0.4);
   border-radius: 12px;
   padding: 16px;
   box-sizing: border-box;
-  transition: box-shadow 0.3s ease;
+  transition: box-shadow 0.3s ease, background-color 0.3s ease, color 0.3s ease;
+}
+
+.gridPattern {
+  stroke-width: 0.5;
+}
+
+.gridBackground {
+  /* Default styling for the grid background */
+}
+
+/* Theme-specific styling */
+.theme-space {
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+  background-color: #0f172a;
 }
 
 .a4Paper {
@@ -48,7 +62,7 @@
   font-size: 16px;
   text-align: center;
   padding: 20px;
-  background-color: #f9fafb;
+  background-color: #44403c; /* Default to dungeon theme */
 }
 
 .emptyStateIcon {
@@ -60,15 +74,16 @@
   font-weight: 600;
   font-size: 18px;
   margin-bottom: 8px;
+  color: #f5f5f4;
 }
 
 .emptyStateSubtext {
   font-size: 14px;
-  color: #888;
+  color: #d6d3d1;
 }
 
 .wall {
-  stroke: #000000;
+  stroke: #292524;
   stroke-width: 2;
   stroke-linecap: square;
   transition: stroke-width 0.2s;
@@ -103,7 +118,12 @@
 }
 
 .portalSvg {
-  filter: drop-shadow(0 2px 3px rgba(0, 0, 0, 0.2));
+  filter: drop-shadow(0 2px 6px rgba(80, 40, 0, 0.5));
+}
+
+/* Special effects for themes */
+.theme-space .portalSvg {
+  filter: drop-shadow(0 2px 6px rgba(99, 102, 241, 0.6));
 }
 
 .mazeInfo {
@@ -143,7 +163,11 @@
   }
   
   .mazeGrid:hover {
-    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.2);
+    box-shadow: 0 12px 32px rgba(60, 40, 20, 0.5);
+  }
+  
+  .theme-space:hover {
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.5);
   }
 }
 
@@ -154,8 +178,12 @@
   }
   
   .mazeGrid {
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 4px 12px rgba(60, 40, 20, 0.3);
     padding: 8px;
+  }
+  
+  .theme-space {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
   }
   
   .wall {
@@ -227,9 +255,27 @@
     border-radius: 0 !important;
   }
   
+  /* Override theme colors for print to ensure visibility */
+  .theme-space {
+    background-color: white !important;
+  }
+  
+  /* Hide the grid pattern in print */
+  .gridPattern {
+    stroke: transparent !important;
+    stroke-opacity: 0 !important;
+    visibility: hidden !important;
+  }
+  
+  .gridBackground {
+    fill: none !important;
+    display: none !important;
+  }
+  
   /* Adjust stroke width for print */
   .wall {
     stroke-width: 1 !important;
+    stroke: black !important;
   }
   
   .portal,

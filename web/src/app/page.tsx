@@ -6,6 +6,9 @@ import ControlPanel from '@/components/ControlPanel/ControlPanel';
 import { generateMazeWithPortals } from '@/lib/maze';
 import { Cell, MazeSize } from '@/lib/maze/types';
 
+// Theme type definition
+export type MazeTheme = 'space' | 'dungeon';
+
 export default function Home() {
   const [mazeData, setMazeData] = useState<Cell[][]>([]);
   // Path data currently not being used in the UI
@@ -15,6 +18,7 @@ export default function Home() {
   const [isGenerating, setIsGenerating] = useState(false);
   const [printReady, setPrintReady] = useState(false);
   const [initialLoad, setInitialLoad] = useState(true);
+  const [selectedTheme, setSelectedTheme] = useState<MazeTheme>('dungeon');
 
   // Generate maze using our new method that creates sectioned maze with portals
   const handleGenerateMaze = useCallback(() => {
@@ -66,6 +70,11 @@ export default function Home() {
   // Handle portal pairs change
   const handlePortalPairsChange = useCallback((pairs: number) => {
     setPortalPairs(pairs);
+  }, []);
+
+  // Handle theme change
+  const handleThemeChange = useCallback((theme: MazeTheme) => {
+    setSelectedTheme(theme);
   }, []);
 
   // Handle print functionality with improved print layout
@@ -151,6 +160,11 @@ export default function Home() {
         case '0':
           handlePortalPairsChange(0);
           break;
+        case 't':
+          // Toggle between dungeon and space themes
+          const nextTheme = selectedTheme === 'dungeon' ? 'space' : 'dungeon';
+          handleThemeChange(nextTheme);
+          break;
         default:
           // Check for number keys 1-4 for portal pairs
           const num = parseInt(e.key);
@@ -168,7 +182,7 @@ export default function Home() {
     return () => {
       window.removeEventListener('keydown', handleKeyDown);
     };
-  }, [handleGenerateMaze, handlePrint, handleSizeChange, handlePortalPairsChange]);
+  }, [handleGenerateMaze, handlePrint, handleSizeChange, handlePortalPairsChange, handleThemeChange, selectedTheme]);
 
   // Generate a maze on initial load
   useEffect(() => {
@@ -191,8 +205,10 @@ export default function Home() {
         <ControlPanel
           selectedSize={selectedSize}
           portalPairs={portalPairs}
+          selectedTheme={selectedTheme}
           onSizeChange={handleSizeChange}
           onPortalPairsChange={handlePortalPairsChange}
+          onThemeChange={handleThemeChange}
           onGenerate={handleGenerateMaze}
           isGenerating={isGenerating}
           onPrint={handlePrint}
@@ -208,6 +224,7 @@ export default function Home() {
         <MazeGrid 
           mazeData={mazeData}
           cellSize={10}
+          theme={selectedTheme}
         />
       </div>
     </main>

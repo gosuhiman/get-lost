@@ -3,30 +3,36 @@
 import React, { memo, useEffect, useState } from 'react';
 import { Cell } from '@/lib/maze/types';
 import styles from './styles.module.css';
+import { MazeTheme } from '@/app/page';
 
 interface MazeGridProps {
   mazeData: Cell[][];
   cellSize?: number;
+  theme?: MazeTheme;
 }
 
 // SVG definitions for portal icons (5 unique designs)
 const portalSvgIcons = [
   // Portal 1 - Spiral design
-  (size: number, cx: number, cy: number) => (
-    <g className={styles.portalSvg}>
-      <path 
-        d={`M ${cx} ${cy} 
-           m ${-size * 0.35} 0 
-           a ${size * 0.35} ${size * 0.35} 0 1 1 ${size * 0.7} 0 
-           a ${size * 0.35} ${size * 0.35} 0 1 1 ${-size * 0.7} 0`} 
-        fill="none" 
-        stroke="#6366f1" 
-        strokeWidth={size * 0.15} 
-      />
-    </g>
-  ),
+  (size: number, cx: number, cy: number, theme: MazeTheme) => {
+    const colors = getThemeColors(theme);
+    return (
+      <g className={styles.portalSvg}>
+        <path 
+          d={`M ${cx} ${cy} 
+             m ${-size * 0.35} 0 
+             a ${size * 0.35} ${size * 0.35} 0 1 1 ${size * 0.7} 0 
+             a ${size * 0.35} ${size * 0.35} 0 1 1 ${-size * 0.7} 0`} 
+          fill="none" 
+          stroke={colors.portal1.stroke} 
+          strokeWidth={size * 0.15} 
+        />
+      </g>
+    );
+  },
   // Portal 2 - Star design
-  (size: number, cx: number, cy: number) => {
+  (size: number, cx: number, cy: number, theme: MazeTheme) => {
+    const colors = getThemeColors(theme);
     const points = 5;
     const outerRadius = size * 0.4;
     const innerRadius = size * 0.2;
@@ -45,12 +51,13 @@ const portalSvgIcons = [
     
     return (
       <g className={styles.portalSvg}>
-        <path d={pathData} fill="#f59e0b" stroke="#c2410c" strokeWidth="1.5" />
+        <path d={pathData} fill={colors.portal2.fill} stroke={colors.portal2.stroke} strokeWidth="1.5" />
       </g>
     );
   },
   // Portal 3 - Hexagon design
-  (size: number, cx: number, cy: number) => {
+  (size: number, cx: number, cy: number, theme: MazeTheme) => {
+    const colors = getThemeColors(theme);
     const points = 6;
     const radius = size * 0.35;
     let pathData = "";
@@ -67,75 +74,168 @@ const portalSvgIcons = [
     
     return (
       <g className={styles.portalSvg}>
-        <path d={pathData} fill="#10b981" stroke="#047857" strokeWidth="1.5" />
+        <path d={pathData} fill={colors.portal3.fill} stroke={colors.portal3.stroke} strokeWidth="1.5" />
       </g>
     );
   },
   // Portal 4 - Diamond design
-  (size: number, cx: number, cy: number) => (
-    <g className={styles.portalSvg}>
-      <rect 
-        x={cx - size * 0.35} 
-        y={cy - size * 0.35}
-        width={size * 0.7}
-        height={size * 0.7}
-        fill="#ec4899"
-        stroke="#be185d"
-        strokeWidth="1.5"
-        transform={`rotate(45 ${cx} ${cy})`}
-      />
-    </g>
-  ),
+  (size: number, cx: number, cy: number, theme: MazeTheme) => {
+    const colors = getThemeColors(theme);
+    return (
+      <g className={styles.portalSvg}>
+        <rect 
+          x={cx - size * 0.35} 
+          y={cy - size * 0.35}
+          width={size * 0.7}
+          height={size * 0.7}
+          fill={colors.portal4.fill}
+          stroke={colors.portal4.stroke}
+          strokeWidth="1.5"
+          transform={`rotate(45 ${cx} ${cy})`}
+        />
+      </g>
+    );
+  },
   // Portal 5 - Concentric circles design
-  (size: number, cx: number, cy: number) => (
-    <g className={styles.portalSvg}>
-      <circle cx={cx} cy={cy} r={size * 0.35} fill="#3b82f6" stroke="#1d4ed8" strokeWidth="1.5" />
-      <circle cx={cx} cy={cy} r={size * 0.20} fill="none" stroke="white" strokeWidth="1.5" />
-    </g>
-  )
+  (size: number, cx: number, cy: number, theme: MazeTheme) => {
+    const colors = getThemeColors(theme);
+    return (
+      <g className={styles.portalSvg}>
+        <circle cx={cx} cy={cy} r={size * 0.35} fill={colors.portal5.fill} stroke={colors.portal5.stroke} strokeWidth="1.5" />
+        <circle cx={cx} cy={cy} r={size * 0.20} fill="none" stroke="white" strokeWidth="1.5" />
+      </g>
+    );
+  }
 ];
 
-// SVG definitions for start and end points
-const startPointSvg = (cx: number, cy: number, size: number) => (
-  <g className={styles.startPointGroup}>
-    <path 
-      d={`M ${cx - size * 0.35} ${cy}
-         L ${cx + size * 0.35} ${cy - size * 0.35}
-         L ${cx + size * 0.35} ${cy + size * 0.35}
-         Z`} 
-      className={styles.startPoint}
-    />
-  </g>
-);
+// Theme colors for various elements
+const getThemeColors = (theme: MazeTheme = 'dungeon') => {
+  switch(theme) {
+    case 'space':
+      return {
+        background: '#0f172a',
+        grid: '#334155',
+        wall: '#94a3b8',
+        start: {
+          fill: '#4ade80',
+          stroke: '#16a34a'
+        },
+        end: {
+          fill: '#fb7185',
+          stroke: '#e11d48'
+        },
+        portal1: {
+          fill: '#c4b5fd',
+          stroke: '#8b5cf6'
+        },
+        portal2: {
+          fill: '#fcd34d',
+          stroke: '#f59e0b'
+        },
+        portal3: {
+          fill: '#5eead4',
+          stroke: '#14b8a6'
+        },
+        portal4: {
+          fill: '#f9a8d4',
+          stroke: '#ec4899'
+        },
+        portal5: {
+          fill: '#93c5fd',
+          stroke: '#3b82f6'
+        }
+      };
+    default: // dungeon
+      return {
+        background: '#44403c',
+        grid: '#78716c',
+        wall: '#292524',
+        start: {
+          fill: '#a3e635',
+          stroke: '#65a30d'
+        },
+        end: {
+          fill: '#f87171',
+          stroke: '#b91c1c'
+        },
+        portal1: {
+          fill: '#a78bfa',
+          stroke: '#7c3aed'
+        },
+        portal2: {
+          fill: '#facc15',
+          stroke: '#ca8a04'
+        },
+        portal3: {
+          fill: '#2dd4bf',
+          stroke: '#0d9488'
+        },
+        portal4: {
+          fill: '#f472b6',
+          stroke: '#db2777'
+        },
+        portal5: {
+          fill: '#60a5fa',
+          stroke: '#2563eb'
+        }
+      };
+  }
+};
 
-const endPointSvg = (cx: number, cy: number, size: number) => (
-  <g className={styles.endPointGroup}>
-    <path
-      d={`M ${cx - size * 0.35} ${cy - size * 0.35}
-         L ${cx + size * 0.35} ${cy - size * 0.35}
-         L ${cx + size * 0.35} ${cy + size * 0.35}
-         L ${cx - size * 0.35} ${cy + size * 0.35}
-         Z`}
-      className={styles.endPoint}
-    />
-    <path
-      d={`M ${cx - size * 0.15} ${cy - size * 0.15}
-         L ${cx + size * 0.15} ${cy - size * 0.15}
-         L ${cx + size * 0.15} ${cy + size * 0.15}
-         L ${cx - size * 0.15} ${cy + size * 0.15}
-         Z`}
-      fill="white"
-      stroke="#8e0000"
-      strokeWidth="1"
-    />
-  </g>
-);
+// SVG definitions for start and end points
+const startPointSvg = (cx: number, cy: number, size: number, theme: MazeTheme = 'dungeon') => {
+  const colors = getThemeColors(theme);
+  return (
+    <g className={styles.startPointGroup}>
+      <path 
+        d={`M ${cx - size * 0.35} ${cy}
+           L ${cx + size * 0.35} ${cy - size * 0.35}
+           L ${cx + size * 0.35} ${cy + size * 0.35}
+           Z`} 
+        fill={colors.start.fill}
+        stroke={colors.start.stroke}
+        strokeWidth="1.5"
+      />
+    </g>
+  );
+};
+
+const endPointSvg = (cx: number, cy: number, size: number, theme: MazeTheme = 'dungeon') => {
+  const colors = getThemeColors(theme);
+  return (
+    <g className={styles.endPointGroup}>
+      <path
+        d={`M ${cx - size * 0.35} ${cy - size * 0.35}
+           L ${cx + size * 0.35} ${cy - size * 0.35}
+           L ${cx + size * 0.35} ${cy + size * 0.35}
+           L ${cx - size * 0.35} ${cy + size * 0.35}
+           Z`}
+        fill={colors.end.fill}
+        stroke={colors.end.stroke}
+        strokeWidth="1.5"
+      />
+      <path
+        d={`M ${cx - size * 0.15} ${cy - size * 0.15}
+           L ${cx + size * 0.15} ${cy - size * 0.15}
+           L ${cx + size * 0.15} ${cy + size * 0.15}
+           L ${cx - size * 0.15} ${cy + size * 0.15}
+           Z`}
+        fill="white"
+        stroke={colors.end.stroke}
+        strokeWidth="1"
+      />
+    </g>
+  );
+};
 
 const MazeGrid: React.FC<MazeGridProps> = memo(({ 
   mazeData, 
-  cellSize = 10 
+  cellSize = 10,
+  theme = 'dungeon'
 }) => {
   const [isDesktop, setIsDesktop] = useState(true);
+  const [isPrinting, setIsPrinting] = useState(false);
+  const colors = getThemeColors(theme);
 
   // Handle resize events to determine if we're on desktop or mobile
   useEffect(() => {
@@ -151,6 +251,41 @@ const MazeGrid: React.FC<MazeGridProps> = memo(({
     
     // Clean up
     return () => window.removeEventListener('resize', handleResize);
+  }, []);
+  
+  // Listen for print events
+  useEffect(() => {
+    const beforePrint = () => {
+      setIsPrinting(true);
+    };
+    
+    const afterPrint = () => {
+      setIsPrinting(false);
+    };
+    
+    window.addEventListener('beforeprint', beforePrint);
+    window.addEventListener('afterprint', afterPrint);
+    
+    // For browsers that don't support beforeprint/afterprint
+    if (window.matchMedia) {
+      const mediaQueryList = window.matchMedia('print');
+      const handlePrintChange = (mql: MediaQueryListEvent) => {
+        setIsPrinting(mql.matches);
+      };
+      
+      mediaQueryList.addEventListener('change', handlePrintChange);
+      
+      return () => {
+        window.removeEventListener('beforeprint', beforePrint);
+        window.removeEventListener('afterprint', afterPrint);
+        mediaQueryList.removeEventListener('change', handlePrintChange);
+      };
+    }
+    
+    return () => {
+      window.removeEventListener('beforeprint', beforePrint);
+      window.removeEventListener('afterprint', afterPrint);
+    };
   }, []);
   
   // Debug: Check if maze data contains portals
@@ -172,7 +307,7 @@ const MazeGrid: React.FC<MazeGridProps> = memo(({
     return (
       <div className={styles.container}>
         <div className={styles.emptyState}>
-          <div className={styles.emptyStateIcon}>🧩</div>
+          <div className={styles.emptyStateIcon}>🏰</div>
           <div className={styles.emptyStateText}>
             Generate a maze to begin your adventure
           </div>
@@ -217,14 +352,14 @@ const MazeGrid: React.FC<MazeGridProps> = memo(({
     const cy = y * cellSize + cellSize / 2;
     
     // Render the SVG icon
-    return portalSvgIcons[iconIndex](cellSize, cx, cy);
+    return portalSvgIcons[iconIndex](cellSize, cx, cy, theme);
   };
   
   return (
     <div className={styles.container} data-print-container="true">
       <div className={styles.mazeWrapper}>
         <svg 
-          className={`${styles.mazeGrid} ${styles.a4Paper}`}
+          className={`${styles.mazeGrid} ${styles.a4Paper} ${styles[`theme-${theme}`]}`}
           viewBox={`-1 -1 ${viewBoxWidth + 2} ${viewBoxHeight + 2}`}
           preserveAspectRatio="xMidYMid meet"
           width="100%" 
@@ -234,24 +369,30 @@ const MazeGrid: React.FC<MazeGridProps> = memo(({
             height: `${maxHeight}px`,
             minWidth: isDesktop ? '700px' : '320px',
             minHeight: isDesktop ? '800px' : '450px',
+            backgroundColor: colors.background,
           }}
           data-print-svg="true"
         >
-          {/* Draw a subtle grid background */}
-          <defs>
-            <pattern id="grid" width={cellSize} height={cellSize} patternUnits="userSpaceOnUse">
-              <path 
-                d={`M ${cellSize} 0 L 0 0 0 ${cellSize}`} 
-                fill="none" 
-                stroke="#f0f0f0" 
-                strokeWidth="0.5"
-              />
-            </pattern>
-          </defs>
-          <rect width="100%" height="100%" fill="url(#grid)" />
+          {/* Draw a subtle grid background - only visible when not printing */}
+          {!isPrinting && (
+            <>
+              <defs>
+                <pattern id="grid" width={cellSize} height={cellSize} patternUnits="userSpaceOnUse">
+                  <path 
+                    d={`M ${cellSize} 0 L 0 0 0 ${cellSize}`} 
+                    fill="none" 
+                    stroke={colors.grid} 
+                    strokeWidth="0.5"
+                    className={styles.gridPattern}
+                  />
+                </pattern>
+              </defs>
+              <rect width="100%" height="100%" fill="url(#grid)" className={styles.gridBackground} />
+            </>
+          )}
           
           {/* Draw the maze grid */}
-          {mazeData.map((row, y) => 
+          {mazeData.map((row, y) => (
             row.map((cell, x) => (
               <g key={`${x}-${y}`} className={styles.cell}>
                 {/* Draw walls */}
@@ -262,6 +403,7 @@ const MazeGrid: React.FC<MazeGridProps> = memo(({
                     y1={y * cellSize} 
                     x2={(x + 1) * cellSize} 
                     y2={y * cellSize} 
+                    stroke={colors.wall}
                   />
                 )}
                 {cell.walls[1] && (
@@ -271,6 +413,7 @@ const MazeGrid: React.FC<MazeGridProps> = memo(({
                     y1={y * cellSize} 
                     x2={(x + 1) * cellSize} 
                     y2={(y + 1) * cellSize} 
+                    stroke={colors.wall}
                   />
                 )}
                 {cell.walls[2] && (
@@ -280,6 +423,7 @@ const MazeGrid: React.FC<MazeGridProps> = memo(({
                     y1={(y + 1) * cellSize} 
                     x2={(x + 1) * cellSize} 
                     y2={(y + 1) * cellSize} 
+                    stroke={colors.wall}
                   />
                 )}
                 {cell.walls[3] && (
@@ -289,6 +433,7 @@ const MazeGrid: React.FC<MazeGridProps> = memo(({
                     y1={y * cellSize} 
                     x2={x * cellSize} 
                     y2={(y + 1) * cellSize} 
+                    stroke={colors.wall}
                   />
                 )}
                 
@@ -296,20 +441,22 @@ const MazeGrid: React.FC<MazeGridProps> = memo(({
                 {cell.portal && renderPortalIcon(cell, x, y)}
               </g>
             ))
-          )}
+          ))}
           
           {/* Start point (top-left) with custom SVG */}
           {startPointSvg(
             startX * cellSize + cellSize / 2,
             startY * cellSize + cellSize / 2,
-            cellSize
+            cellSize,
+            theme
           )}
           
           {/* End point (bottom-right) with custom SVG */}
           {endPointSvg(
             endX * cellSize + cellSize / 2,
             endY * cellSize + cellSize / 2,
-            cellSize
+            cellSize,
+            theme
           )}
         </svg>
         
