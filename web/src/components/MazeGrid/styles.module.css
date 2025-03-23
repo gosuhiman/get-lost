@@ -27,7 +27,7 @@
   border-radius: 12px;
   padding: 16px;
   box-sizing: border-box;
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  transition: box-shadow 0.3s ease;
 }
 
 .a4Paper {
@@ -80,12 +80,7 @@
 
 .startPointGroup, .endPointGroup {
   cursor: pointer;
-  transition: transform 0.2s ease;
   filter: drop-shadow(0 2px 3px rgba(0, 0, 0, 0.3));
-}
-
-.startPointGroup:hover, .endPointGroup:hover {
-  transform: scale(1.2);
 }
 
 .startPoint {
@@ -105,17 +100,10 @@
   stroke: black;
   stroke-width: 1;
   filter: drop-shadow(0 2px 3px rgba(0, 0, 0, 0.2));
-  transition: transform 0.2s ease;
 }
 
 .portalSvg {
   filter: drop-shadow(0 2px 3px rgba(0, 0, 0, 0.2));
-  transition: transform 0.2s ease;
-}
-
-g:hover .portal,
-g:hover .portalSvg {
-  transform: scale(1.1);
 }
 
 .mazeInfo {
@@ -151,11 +139,10 @@ g:hover .portalSvg {
 @media (min-width: 1280px) {
   .mazeGrid {
     max-width: 1200px;
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    transition: box-shadow 0.3s ease;
   }
   
   .mazeGrid:hover {
-    transform: scale(1.02);
     box-shadow: 0 12px 32px rgba(0, 0, 0, 0.2);
   }
 }
