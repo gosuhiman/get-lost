@@ -1,12 +1,14 @@
 # Get Lost!
 
-A maze generation web application built with Next.js 15. Generate customizable mazes that can be printed.
+A maze generation web application built with Next.js 15. Generate customizable mazes with portal systems that can be printed.
 
 ## Features
 
 - Dynamic maze generation using Depth-First Search algorithm
 - Multiple maze sizes (S/M/L/XL)
+- Portal system for instant transportation between maze locations
 - Clean SVG rendering for crisp printing
+- Print-friendly black and white design
 - Responsive design
 
 ## Tech Stack
@@ -34,6 +36,7 @@ cd get-lost
 
 2. Install dependencies
 ```bash
+cd web
 npm install
 # or
 yarn install
@@ -51,22 +54,20 @@ yarn dev
 ## Project Structure
 
 ```
-src/
+web/src/
 ├── app/
 │   ├── layout.tsx        # Root layout with print styles
 │   └── page.tsx          # Main maze interface (client component)
 ├── components/
 │   ├── MazeGrid/         # SVG-based maze renderer
-│   │   ├── MazeGrid.tsx
-│   │   └── styles.module.css
 │   └── ControlPanel/     # Generate/Print controls
-│       ├── ControlPanel.tsx
-│       └── styles.module.css
 ├── lib/
 │   └── maze/             # Core maze logic
 │       ├── generator.ts  # DFS algorithm implementation
+│       ├── portals.ts    # Portal pair generation and handling
+│       ├── solver.ts     # Maze solving algorithm
 │       └── types.ts      # Type definitions
-└── styles/               # Global CSS
+└── __tests__/            # Test files
 ```
 
 ## Development
@@ -95,4 +96,8 @@ npm run start
 # or
 yarn build
 yarn start
-``` 
+```
+
+## Portal System
+
+The maze features a portal system that allows instant transportation between different locations in the maze. Portal pairs are placed at dead-ends in disconnected sections of the maze, requiring users to use them to navigate through the entire maze. Each portal connects to exactly one other portal, and multiple portal pairs can exist in a single maze. 
