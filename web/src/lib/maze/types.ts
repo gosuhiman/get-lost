@@ -10,9 +10,10 @@ export interface SizeConfig {
   height: number;
 }
 
+// Adjusted for A4 paper size (1:1.414 ratio)
 export const SIZE_CONFIGS: Record<MazeSize, SizeConfig> = {
-  'S': { width: 10, height: 10 },
-  'M': { width: 20, height: 20 },
-  'L': { width: 30, height: 30 },
-  'XL': { width: 40, height: 40 },
+  'S': { width: 12, height: 17 },  // A4 proportional
+  'M': { width: 21, height: 30 },  // A4 proportional
+  'L': { width: 30, height: 42 },  // A4 proportional
+  'XL': { width: 40, height: 56 }, // A4 proportional
 }; 

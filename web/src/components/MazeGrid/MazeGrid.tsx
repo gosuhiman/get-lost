@@ -18,7 +18,7 @@ const MazeGrid: React.FC<MazeGridProps> = memo(({
       <div className={styles.container}>
         <div style={{ 
           width: '300px', 
-          height: '200px', 
+          height: '424px', // A4 proportional empty state
           border: '1px dashed #ccc',
           display: 'flex',
           alignItems: 'center',
@@ -43,6 +43,12 @@ const MazeGrid: React.FC<MazeGridProps> = memo(({
   const viewBoxWidth = width * cellSize;
   const viewBoxHeight = height * cellSize;
   
+  // A4 proportion calculation (1:1.414 ratio - width:height)
+  const a4Ratio = 1.414;
+  // For screen display
+  const maxWidth = Math.min(1000, viewBoxWidth * 1.5);
+  const maxHeight = maxWidth * a4Ratio;
+  
   // Entry and exit points (top-left and bottom-right)
   const startX = 0;
   const startY = 0;
@@ -50,20 +56,22 @@ const MazeGrid: React.FC<MazeGridProps> = memo(({
   const endY = height - 1;
   
   return (
-    <div className={styles.container}>
+    <div className={styles.container} data-print-container="true">
       <svg 
-        className={styles.mazeGrid}
-        viewBox={`0 0 ${viewBoxWidth} ${viewBoxHeight}`}
+        className={`${styles.mazeGrid} ${styles.a4Paper}`}
+        viewBox={`-1 -1 ${viewBoxWidth + 2} ${viewBoxHeight + 2}`}
         preserveAspectRatio="xMidYMid meet"
         width="100%" 
         height="100%"
         style={{ 
           border: '1px solid #ddd',
-          width: `${Math.min(1200, viewBoxWidth * 1.5)}px`,
-          height: `${Math.min(1000, viewBoxHeight * 1.5)}px`,
+          width: `${maxWidth}px`,
+          height: `${maxHeight}px`,
           minWidth: '500px',
-          minHeight: '500px'
+          minHeight: '700px',
+          boxSizing: 'border-box'
         }}
+        data-print-svg="true"
       >
         {/* Draw the maze grid */}
         {mazeData.map((row, y) => 

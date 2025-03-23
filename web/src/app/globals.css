@@ -47,17 +47,94 @@ button {
 }
 
 @media print {
+  * {
+    margin: 0 !important;
+    padding: 0 !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+  
   .no-print {
     display: none !important;
   }
   
-  body {
-    background: white;
-    color: black;
+  html, body {
+    width: 100% !important;
+    height: 100% !important;
+    background: white !important;
+    color: black !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow: hidden !important;
   }
   
   main {
-    padding: 0;
+    width: 100% !important;
+    height: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+  
+  /* A4 paper size setup */
+  @page {
+    size: A4 portrait;
+    margin: 0 !important;
+    padding: 0 !important;
+    scale: 100%;
+  }
+  
+  /* Chrome-specific */
+  @page :first {
     margin: 0;
+  }
+  
+  /* Firefox-specific */
+  @-moz-document url-prefix() {
+    body {
+      size: A4;
+      margin: 0;
+    }
+  }
+  
+  /* Safari */
+  html.safari body {
+    width: 210mm;
+    height: 297mm;
+  }
+  
+  /* Fix for SVG overflow issues */
+  svg {
+    overflow: visible !important;
+  }
+  
+  .print-focused {
+    width: 100% !important;
+    height: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    page-break-inside: avoid !important;
+    overflow: visible !important;
+    transform: scale(1) !important;
+  }
+  
+  /* Ensure elements with data-print attributes fill the page */
+  [data-print-container="true"] {
+    position: absolute !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+  
+  [data-print-svg="true"] {
+    width: 100% !important;
+    height: 100% !important;
+    border: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    min-width: unset !important;
+    min-height: unset !important;
   }
 }

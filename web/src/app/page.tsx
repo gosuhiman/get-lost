@@ -36,12 +36,48 @@ export default function Home() {
     setSelectedSize(size);
   }, []);
 
-  // Handle print functionality
+  // Handle print functionality with improved print layout
   const handlePrint = useCallback(() => {
+    // Set print ready state to adjust styling
     setPrintReady(true);
+    
+    // Add a minimal delay to ensure styles are applied before print
     setTimeout(() => {
-      window.print();
-      setPrintReady(false);
+      // Apply print-specific styles for better margin handling
+      document.body.classList.add('printing');
+      
+      // Force browser to recalculate layout
+      window.dispatchEvent(new Event('resize'));
+      
+      // Trigger print dialog with specific settings
+      const printWindow = window;
+      try {
+        // For Chrome and modern browsers
+        if (printWindow.matchMedia) {
+          const mediaQueryList = printWindow.matchMedia('print');
+          mediaQueryList.addListener(function(mql) {
+            if (!mql.matches) {
+              // Clean up after printing is done
+              document.body.classList.remove('printing');
+              setPrintReady(false);
+            }
+          });
+        }
+      } catch (e) {
+        // Fallback if above doesn't work
+        console.error("Print event listener failed", e);
+      }
+      
+      // Print with minimal delay to ensure styles are applied
+      setTimeout(() => {
+        window.print();
+        
+        // Fallback cleanup
+        setTimeout(() => {
+          document.body.classList.remove('printing');
+          setPrintReady(false);
+        }, 500);
+      }, 100);
     }, 300);
   }, []);
 
@@ -51,10 +87,16 @@ export default function Home() {
       setInitialLoad(false);
       handleGenerateMaze();
     }
+    
+    // Detect Safari for print-specific styles
+    const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
+    if (isSafari) {
+      document.documentElement.classList.add('safari');
+    }
   }, [initialLoad, handleGenerateMaze]);
 
   return (
-    <div className="min-h-screen flex flex-col p-2 md:p-4 gap-4">
+    <div className={`min-h-screen flex flex-col ${printReady ? 'p-0' : 'p-2 md:p-4'} gap-4`}>
       <header className="text-center no-print mb-2">
         <h1 className="text-3xl font-bold mt-2">Get Lost!</h1>
         <p className="text-lg mb-3">

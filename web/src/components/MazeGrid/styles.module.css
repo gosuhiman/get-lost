@@ -18,6 +18,11 @@
   border-radius: 4px;
 }
 
+.a4Paper {
+  /* A4 aspect ratio is 1:1.414 (width:height) */
+  aspect-ratio: 1 / 1.414;
+}
+
 .wall {
   stroke: #000000;
   stroke-width: 2;
@@ -37,11 +42,43 @@
 }
 
 @media print {
+  .container {
+    position: absolute !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+    overflow: visible !important;
+    transform-origin: top left !important;
+  }
+  
   .mazeGrid {
-    max-width: 100%;
-    max-height: 100%;
-    zoom: 120%;
-    background-color: white;
-    box-shadow: none;
+    position: absolute !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
+    max-width: none !important;
+    max-height: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    page-break-inside: avoid !important;
+    box-shadow: none !important;
+    background-color: white !important;
+    transform-origin: top left !important;
+    transform: scale(1) !important;
+    border-radius: 0 !important;
+  }
+  
+  /* Adjust stroke width for print */
+  .wall {
+    stroke-width: 1 !important;
   }
 } 
