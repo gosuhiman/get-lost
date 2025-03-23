@@ -57,7 +57,7 @@ describe('MazeGrid Component', () => {
     expect(emptyStateText).toBeInTheDocument();
     
     // Check for the emoji in the empty state
-    const emptyStateIcon = screen.getByText('🧩');
+    const emptyStateIcon = screen.getByText('🏰');
     expect(emptyStateIcon).toBeInTheDocument();
   });
   

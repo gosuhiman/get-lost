@@ -9,8 +9,10 @@ describe('ControlPanel Component', () => {
   const defaultProps = {
     selectedSize: 'M' as MazeSize,
     portalPairs: 2,
+    selectedTheme: 'dungeon' as const,
     onSizeChange: jest.fn(),
     onPortalPairsChange: jest.fn(),
+    onThemeChange: jest.fn(),
     onGenerate: jest.fn(),
     onPrint: jest.fn(),
     isGenerating: false,
@@ -180,5 +182,30 @@ describe('ControlPanel Component', () => {
     expect(screen.getByText('G')).toBeInTheDocument();
     expect(screen.getByText('P')).toBeInTheDocument();
     expect(screen.getByText('1-4')).toBeInTheDocument();
+  });
+  
+  it('renders theme options and calls onThemeChange when clicked', () => {
+    const mockOnThemeChange = jest.fn();
+    render(
+      <ControlPanel 
+        {...defaultProps} 
+        onThemeChange={mockOnThemeChange}
+        selectedTheme="dungeon"
+      />
+    );
+    
+    // Check for theme options
+    expect(screen.getByText('Dungeon')).toBeInTheDocument();
+    expect(screen.getByText('Space')).toBeInTheDocument();
+    
+    // Check active state
+    const dungeonButton = screen.getByText('Dungeon').closest('button');
+    expect(dungeonButton).toHaveClass('themeButtonActive');
+    
+    // Click space theme
+    fireEvent.click(screen.getByText('Space'));
+    
+    // Check if onThemeChange was called with 'space'
+    expect(mockOnThemeChange).toHaveBeenCalledWith('space');
   });
 }); 
