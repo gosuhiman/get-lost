@@ -41,6 +41,18 @@
   stroke-width: 0.5;
 }
 
+.portal {
+  fill: white;
+  stroke: black;
+  stroke-width: 0.8;
+}
+
+.portalText {
+  font-family: Arial, sans-serif;
+  font-weight: bold;
+  user-select: none;
+}
+
 @media print {
   .container {
     position: absolute !important;
@@ -80,5 +92,9 @@
   /* Adjust stroke width for print */
   .wall {
     stroke-width: 1 !important;
+  }
+  
+  .portalText {
+    font-size: smaller !important;
   }
 } 

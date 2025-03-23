@@ -4,16 +4,18 @@ import { useState, useCallback, useEffect } from 'react';
 import MazeGrid from '@/components/MazeGrid/MazeGrid';
 import ControlPanel from '@/components/ControlPanel/ControlPanel';
 import { generateMaze } from '@/lib/maze/generator';
+import { addPortals } from '@/lib/maze/portals';
 import { Cell, MazeSize, SIZE_CONFIGS } from '@/lib/maze/types';
 
 export default function Home() {
   const [mazeData, setMazeData] = useState<Cell[][]>([]);
   const [selectedSize, setSelectedSize] = useState<MazeSize>('M');
+  const [portalPairs, setPortalPairs] = useState<number>(2);
   const [isGenerating, setIsGenerating] = useState(false);
   const [printReady, setPrintReady] = useState(false);
   const [initialLoad, setInitialLoad] = useState(true);
 
-  // Generate maze using the DFS algorithm
+  // Generate maze using the DFS algorithm and add portals
   const handleGenerateMaze = useCallback(() => {
     setIsGenerating(true);
     
@@ -22,18 +24,30 @@ export default function Home() {
       try {
         const { width, height } = SIZE_CONFIGS[selectedSize];
         const newMaze = generateMaze(width, height);
-        setMazeData(newMaze);
-      } catch (error) {
+        
+        // Add portal pairs if requested
+        const mazeWithPortals = portalPairs > 0 
+          ? addPortals(newMaze, portalPairs) 
+          : newMaze;
+          
+        setMazeData(mazeWithPortals);
+      } catch (err) {
         // Silent error handling in production
+        console.error("Error generating maze:", err);
       } finally {
         setIsGenerating(false);
       }
     }, 10);
-  }, [selectedSize]);
+  }, [selectedSize, portalPairs]);
 
   // Handle size change
   const handleSizeChange = useCallback((size: MazeSize) => {
     setSelectedSize(size);
+  }, []);
+
+  // Handle portal pairs change
+  const handlePortalPairsChange = useCallback((pairs: number) => {
+    setPortalPairs(pairs);
   }, []);
 
   // Handle print functionality with improved print layout
@@ -100,7 +114,7 @@ export default function Home() {
       <header className="text-center no-print mb-2">
         <h1 className="text-3xl font-bold mt-2">Get Lost!</h1>
         <p className="text-lg mb-3">
-          Generate, solve, and print mazes of various sizes
+          Generate, solve, and print mazes with portals of various sizes
         </p>
       </header>
 
@@ -114,7 +128,9 @@ export default function Home() {
         <div className="no-print w-full max-w-2xl mt-2 mb-4">
           <ControlPanel
             selectedSize={selectedSize}
+            portalPairs={portalPairs}
             onSizeChange={handleSizeChange}
+            onPortalPairsChange={handlePortalPairsChange}
             onGenerate={handleGenerateMaze}
             onPrint={handlePrint}
             isGenerating={isGenerating}

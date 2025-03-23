@@ -114,6 +114,32 @@ const MazeGrid: React.FC<MazeGridProps> = memo(({
                   y2={(y + 1) * cellSize} 
                 />
               )}
+              
+              {/* Draw portal indicators */}
+              {cell.portal && (
+                <>
+                  <circle 
+                    className={styles.portal}
+                    cx={x * cellSize + cellSize / 2} 
+                    cy={y * cellSize + cellSize / 2} 
+                    r={cellSize / 3} 
+                    stroke="black"
+                    strokeWidth="0.8"
+                    fill="white"
+                  />
+                  <text 
+                    x={x * cellSize + cellSize / 2} 
+                    y={y * cellSize + cellSize / 2 + cellSize / 12} 
+                    fontSize={cellSize / 3}
+                    textAnchor="middle" 
+                    dominantBaseline="middle"
+                    fill="black"
+                    className={styles.portalText}
+                  >
+                    {cell.portal.id}
+                  </text>
+                </>
+              )}
             </g>
           ))
         )}
