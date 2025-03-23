@@ -201,3 +201,107 @@ Implement portal generation:
     - Portal identification legibility
 
 This architecture leverages Next.js 15's app router while keeping the bundle size minimal (≈50kb gzipped). The DFS algorithm provides O(n) complexity suitable for browser execution, with Web Workers preventing main thread blocking for large mazes.
+
+## CI/CD Pipeline
+
+The application uses GitHub Actions for continuous integration and deployment to GitHub Pages within the same repository.
+
+### Workflow Configuration
+
+```yaml
+name: Build and Deploy
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+        cache: 'npm'
+        
+    - name: Install dependencies
+      run: npm ci
+      
+    - name: Run tests
+      run: npm test
+      
+    - name: Build
+      run: npm run build
+      env:
+        # Configure Next.js for GitHub Pages static export
+        NEXT_PUBLIC_BASE_PATH: '/get-lost'
+        
+    - name: Export static files
+      run: npm run export
+        
+    - name: Upload artifacts
+      uses: actions/upload-pages-artifact@v3
+      with:
+        path: ./out
+        
+  deploy:
+    if: github.ref == 'refs/heads/main'
+    needs: build
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
+```
+
+### Next.js Configuration for Static Export
+
+```typescript
+// next.config.ts
+const nextConfig = {
+  output: 'export',
+  // Handle GitHub Pages path prefix correctly
+  basePath: process.env.NEXT_PUBLIC_BASE_PATH || '',
+  images: {
+    unoptimized: true,
+  },
+};
+
+export default nextConfig;
+```
+
+### Package.json Scripts
+
+```json
+"scripts": {
+  "dev": "next dev",
+  "build": "next build",
+  "export": "next export",
+  "start": "next start",
+  "test": "jest",
+  "lint": "next lint"
+}
+```
+
+### GitHub Repository Configuration
+
+1. Repository settings must have GitHub Pages enabled:
+   - Source: GitHub Actions
+   - Permissions: Read/write for workflow
+
+2. Repository secrets and variables:
+   - No sensitive information needed as deployment uses GitHub's built-in Pages service
+
+This CI/CD pipeline ensures that changes pushed to the main branch are automatically tested, built, and deployed to GitHub Pages, making the maze generator accessible at `https://[username].github.io/get-lost/`.
