@@ -23,7 +23,7 @@ describe('Theme Utilities', () => {
     });
     
     it('returns dungeon theme when an invalid theme is provided', () => {
-      // @ts-ignore - Testing with invalid theme
+      // @ts-expect-error - Testing with invalid theme
       const colors = getThemeColors('invalid');
       
       // Should fall back to dungeon theme

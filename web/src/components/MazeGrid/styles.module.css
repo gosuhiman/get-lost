@@ -45,6 +45,11 @@
   aspect-ratio: 1 / 1.414;
 }
 
+/* For extra large mazes, allow them to have a custom aspect ratio */
+.a4Paper.xl-maze {
+  aspect-ratio: auto;
+}
+
 .emptyState {
   width: 300px;
   height: 424px; /* A4 proportional empty state */

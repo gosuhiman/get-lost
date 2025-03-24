@@ -146,9 +146,19 @@ const MazeGrid: React.FC<MazeGridProps> = memo(({
   // A4 proportion calculation (1:1.414 ratio - width:height)
   const a4Ratio = 1.414;
   
-  // For screen display - updated to allow larger size on desktop
+  // Calculate the aspect ratio of the current maze
+  const mazeAspectRatio = height / width;
+  
+  // For screen display - updated to allow larger size on desktop while ensuring it fits vertically
   const maxWidth = isDesktop ? Math.min(1600, viewBoxWidth * 2.5) : Math.min(500, viewBoxWidth);
-  const maxHeight = maxWidth * a4Ratio;
+  
+  // For XL mazes, we need to ensure vertical fit - check if it's the XL size
+  const isXLMaze = height >= 50; // XL maze is 40x56
+  
+  // Adjust maxHeight to ensure it fits on screen
+  const maxHeight = isXLMaze 
+    ? Math.min(window.innerHeight * 0.85, maxWidth * mazeAspectRatio)  // For XL, 85% of viewport height
+    : maxWidth * a4Ratio;  // For other sizes, maintain A4 ratio
   
   // Entry and exit points (top-left and bottom-right)
   const startX = 0;
@@ -160,16 +170,17 @@ const MazeGrid: React.FC<MazeGridProps> = memo(({
     <div className={styles.container} data-print-container="true">
       <div className={styles.mazeWrapper}>
         <svg 
-          className={`${styles.mazeGrid} ${styles.a4Paper} ${styles[`theme-${theme}`]}`}
+          className={`${styles.mazeGrid} ${styles.a4Paper} ${isXLMaze ? styles['xl-maze'] : ''} ${styles[`theme-${theme}`]}`}
           viewBox={`-1 -1 ${viewBoxWidth + 2} ${viewBoxHeight + 2}`}
-          preserveAspectRatio="xMidYMid meet"
+          preserveAspectRatio={isXLMaze ? "xMidYMid meet" : "xMidYMid meet"}
           width="100%" 
           height="100%"
           style={{ 
             width: `${maxWidth}px`,
             height: `${maxHeight}px`,
             minWidth: isDesktop ? '900px' : '320px',
-            minHeight: isDesktop ? '900px' : '450px',
+            minHeight: isDesktop ? (isXLMaze ? '700px' : '900px') : '450px',
+            maxHeight: isXLMaze ? '90vh' : undefined,
             backgroundColor: colors.background,
           }}
           data-print-svg="true"
