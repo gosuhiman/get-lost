@@ -3,6 +3,90 @@ import { render, screen, fireEvent } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import ControlPanel from '@/components/ControlPanel/ControlPanel';
 import { MazeSize } from '@/lib/maze/types';
+import { 
+  SizeSelector,
+  PortalSelector, 
+  ThemeSelector, 
+  ActionButtons
+} from '@/components/ControlPanel/components';
+
+// Mock the component imports so we can test the component isolation
+jest.mock('@/components/ControlPanel/components', () => ({
+  SizeSelector: jest.fn(({ selectedSize, onSizeChange, isGenerating }) => (
+    <div data-testid="size-selector">
+      {['S', 'M', 'L', 'XL'].map((size) => (
+        <button 
+          key={size} 
+          onClick={() => onSizeChange(size as MazeSize)} 
+          disabled={isGenerating}
+          data-testid={`size-${size}`}
+          className={selectedSize === size ? 'sizeButtonActive' : ''}
+        >
+          {size}
+        </button>
+      ))}
+    </div>
+  )),
+  PortalSelector: jest.fn(({ portalPairs, onPortalPairsChange, isGenerating }) => (
+    <div data-testid="portal-selector">
+      {[0, 1, 2, 3].map((pairs) => (
+        <button 
+          key={pairs} 
+          onClick={() => onPortalPairsChange(pairs)} 
+          disabled={isGenerating}
+          data-testid={`portal-${pairs}`}
+          className={portalPairs === pairs ? 'portalButtonActive' : ''}
+        >
+          {pairs}
+        </button>
+      ))}
+    </div>
+  )),
+  ThemeSelector: jest.fn(({ selectedTheme, onThemeChange, isGenerating }) => (
+    <div data-testid="theme-selector">
+      <button 
+        onClick={() => onThemeChange('dungeon')} 
+        disabled={isGenerating}
+        data-testid="theme-dungeon"
+        className={selectedTheme === 'dungeon' ? 'themeButtonActive' : ''}
+      >
+        Dungeon
+      </button>
+      <button 
+        onClick={() => onThemeChange('space')} 
+        disabled={isGenerating}
+        data-testid="theme-space"
+        className={selectedTheme === 'space' ? 'themeButtonActive' : ''}
+      >
+        Space
+      </button>
+    </div>
+  )),
+  ActionButtons: jest.fn(({ onGenerate, onPrint, isGenerating, hasMaze }) => (
+    <div data-testid="action-buttons">
+      <button 
+        onClick={onGenerate} 
+        disabled={isGenerating}
+        data-testid="generate-button"
+      >
+        {isGenerating ? 'Generating...' : 'Generate Maze'}
+      </button>
+      <button 
+        onClick={onPrint} 
+        disabled={!hasMaze || isGenerating}
+        data-testid="print-button"
+        className="printButton"
+      >
+        Print Maze
+      </button>
+    </div>
+  )),
+  KeyboardShortcuts: jest.fn(() => (
+    <div data-testid="keyboard-shortcuts">
+      Keyboard Shortcuts
+    </div>
+  )),
+}));
 
 describe('ControlPanel Component', () => {
   // Default mock props
@@ -19,48 +103,64 @@ describe('ControlPanel Component', () => {
     hasMaze: true,
   };
 
-  it('renders all size options', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it('renders all subcomponents', () => {
     render(<ControlPanel {...defaultProps} />);
     
-    // Check for all size buttons using the new span structure
-    const sizeOptions = ['S', 'M', 'L', 'XL'];
-    sizeOptions.forEach(size => {
-      expect(screen.getByText(size)).toBeInTheDocument();
-    });
+    expect(screen.getByTestId('size-selector')).toBeInTheDocument();
+    expect(screen.getByTestId('portal-selector')).toBeInTheDocument();
+    expect(screen.getByTestId('theme-selector')).toBeInTheDocument();
+    expect(screen.getByTestId('action-buttons')).toBeInTheDocument();
+    expect(screen.getByTestId('keyboard-shortcuts')).toBeInTheDocument();
   });
 
-  it('renders all portal pair options', () => {
+  it('passes correct props to SizeSelector', () => {
     render(<ControlPanel {...defaultProps} />);
     
-    // Check for all portal pair options (0-3)
-    expect(screen.getByText('0')).toBeInTheDocument();
-    expect(screen.getByText('1')).toBeInTheDocument();
-    expect(screen.getByText('2')).toBeInTheDocument();
-    expect(screen.getByText('3')).toBeInTheDocument();
+    // Get the mock directly from the imported component
+    const mockSizeSelector = SizeSelector as jest.MockedFunction<typeof SizeSelector>;
+    const props = mockSizeSelector.mock.calls[0][0];
+    
+    expect(props.selectedSize).toBe('M');
+    expect(props.isGenerating).toBe(false);
+    expect(typeof props.onSizeChange).toBe('function');
   });
 
-  it('highlights the selected size option', () => {
-    render(<ControlPanel {...defaultProps} selectedSize="L" />);
+  it('passes correct props to PortalSelector', () => {
+    render(<ControlPanel {...defaultProps} />);
     
-    // Find the span with text 'L', then get its parent button
-    const lButton = screen.getByText('L').closest('button');
-    expect(lButton).toHaveClass('sizeButtonActive');
+    const mockPortalSelector = PortalSelector as jest.MockedFunction<typeof PortalSelector>;
+    const props = mockPortalSelector.mock.calls[0][0];
     
-    // Check that other buttons don't have the active class
-    const mButton = screen.getByText('M').closest('button');
-    expect(mButton).not.toHaveClass('sizeButtonActive');
+    expect(props.portalPairs).toBe(2);
+    expect(props.isGenerating).toBe(false);
+    expect(typeof props.onPortalPairsChange).toBe('function');
   });
 
-  it('highlights the selected portal pairs option', () => {
-    render(<ControlPanel {...defaultProps} portalPairs={3} />);
+  it('passes correct props to ThemeSelector', () => {
+    render(<ControlPanel {...defaultProps} />);
     
-    // Check that the '3' button has the active class - now it's portalButtonActive
-    const button3 = screen.getByText('3').closest('button');
-    expect(button3).toHaveClass('portalButtonActive');
+    const mockThemeSelector = ThemeSelector as jest.MockedFunction<typeof ThemeSelector>;
+    const props = mockThemeSelector.mock.calls[0][0];
     
-    // Check that other buttons don't have the active class
-    const button2 = screen.getByText('2').closest('button');
-    expect(button2).not.toHaveClass('portalButtonActive');
+    expect(props.selectedTheme).toBe('dungeon');
+    expect(props.isGenerating).toBe(false);
+    expect(typeof props.onThemeChange).toBe('function');
+  });
+
+  it('passes correct props to ActionButtons', () => {
+    render(<ControlPanel {...defaultProps} />);
+    
+    const mockActionButtons = ActionButtons as jest.MockedFunction<typeof ActionButtons>;
+    const props = mockActionButtons.mock.calls[0][0];
+    
+    expect(props.isGenerating).toBe(false);
+    expect(props.hasMaze).toBe(true);
+    expect(typeof props.onGenerate).toBe('function');
+    expect(typeof props.onPrint).toBe('function');
   });
 
   it('calls onSizeChange when a size button is clicked', () => {
@@ -73,7 +173,7 @@ describe('ControlPanel Component', () => {
     );
     
     // Click the 'L' size button
-    fireEvent.click(screen.getByText('L'));
+    fireEvent.click(screen.getByTestId('size-L'));
     
     // Check if onSizeChange was called with 'L'
     expect(mockOnSizeChange).toHaveBeenCalledWith('L');
@@ -89,26 +189,39 @@ describe('ControlPanel Component', () => {
     );
     
     // Click the '3' portal pairs button
-    fireEvent.click(screen.getByText('3'));
+    fireEvent.click(screen.getByTestId('portal-3'));
     
     // Check if onPortalPairsChange was called with 3
     expect(mockOnPortalPairsChange).toHaveBeenCalledWith(3);
   });
 
+  it('calls onThemeChange when a theme button is clicked', () => {
+    const mockOnThemeChange = jest.fn();
+    render(
+      <ControlPanel 
+        {...defaultProps} 
+        onThemeChange={mockOnThemeChange}
+      />
+    );
+    
+    // Click the 'space' theme button
+    fireEvent.click(screen.getByTestId('theme-space'));
+    
+    // Check if onThemeChange was called with 'space'
+    expect(mockOnThemeChange).toHaveBeenCalledWith('space');
+  });
+
   it('calls onGenerate when the Generate button is clicked', () => {
     const mockOnGenerate = jest.fn();
-    const { container } = render(
+    render(
       <ControlPanel 
         {...defaultProps} 
         onGenerate={mockOnGenerate}
       />
     );
     
-    // Find the Generate button using container query and class
-    const generateButton = container.querySelector('.actionsSection button:first-child');
-    if (generateButton) {
-      fireEvent.click(generateButton);
-    }
+    // Click the Generate button
+    fireEvent.click(screen.getByTestId('generate-button'));
     
     // Check if onGenerate was called
     expect(mockOnGenerate).toHaveBeenCalled();
@@ -116,18 +229,15 @@ describe('ControlPanel Component', () => {
 
   it('calls onPrint when the Print button is clicked', () => {
     const mockOnPrint = jest.fn();
-    const { container } = render(
+    render(
       <ControlPanel 
         {...defaultProps} 
         onPrint={mockOnPrint}
       />
     );
     
-    // Find the Print button using container query and class
-    const printButton = container.querySelector('.printButton');
-    if (printButton) {
-      fireEvent.click(printButton);
-    }
+    // Click the Print button
+    fireEvent.click(screen.getByTestId('print-button'));
     
     // Check if onPrint was called
     expect(mockOnPrint).toHaveBeenCalled();
@@ -136,76 +246,16 @@ describe('ControlPanel Component', () => {
   it('disables buttons when isGenerating is true', () => {
     render(<ControlPanel {...defaultProps} isGenerating={true} />);
     
-    // Check that all size buttons are disabled
-    const sizeButtons = ['S', 'M', 'L', 'XL'].map(size => 
-      screen.getByText(size).closest('button')
-    );
+    // Get all mocked components
+    const mockSizeSelector = SizeSelector as jest.MockedFunction<typeof SizeSelector>;
+    const mockPortalSelector = PortalSelector as jest.MockedFunction<typeof PortalSelector>;
+    const mockThemeSelector = ThemeSelector as jest.MockedFunction<typeof ThemeSelector>;
+    const mockActionButtons = ActionButtons as jest.MockedFunction<typeof ActionButtons>;
     
-    sizeButtons.forEach(button => {
-      if (button) {
-        expect(button).toBeDisabled();
-      }
-    });
-    
-    // Check that all portal pair buttons are disabled
-    const portalButtons = ['0', '1', '2', '3'].map(num => 
-      screen.getByText(num).closest('button')
-    );
-    
-    portalButtons.forEach(button => {
-      if (button) {
-        expect(button).toBeDisabled();
-      }
-    });
-    
-    // Check that generate button shows loading state by finding the span within the first action button
-    const { container } = render(<ControlPanel {...defaultProps} isGenerating={true} />);
-    const loadingText = container.querySelector('.actionsSection button:first-child span:last-child');
-    expect(loadingText?.textContent).toBe('Generating...');
-  });
-
-  it('disables Print button when hasMaze is false', () => {
-    const { container } = render(<ControlPanel {...defaultProps} hasMaze={false} />);
-    
-    // Get the Print button by class
-    const printButton = container.querySelector('.printButton');
-    if (printButton) {
-      expect(printButton).toBeDisabled();
-    }
-  });
-  
-  it('renders keyboard shortcuts section', () => {
-    render(<ControlPanel {...defaultProps} />);
-    
-    // Check for keyboard shortcuts section
-    expect(screen.getByText('Keyboard Shortcuts')).toBeInTheDocument();
-    expect(screen.getByText('G')).toBeInTheDocument();
-    expect(screen.getByText('P')).toBeInTheDocument();
-    expect(screen.getByText('1-4')).toBeInTheDocument();
-  });
-  
-  it('renders theme options and calls onThemeChange when clicked', () => {
-    const mockOnThemeChange = jest.fn();
-    render(
-      <ControlPanel 
-        {...defaultProps} 
-        onThemeChange={mockOnThemeChange}
-        selectedTheme="dungeon"
-      />
-    );
-    
-    // Check for theme options
-    expect(screen.getByText('Dungeon')).toBeInTheDocument();
-    expect(screen.getByText('Space')).toBeInTheDocument();
-    
-    // Check active state
-    const dungeonButton = screen.getByText('Dungeon').closest('button');
-    expect(dungeonButton).toHaveClass('themeButtonActive');
-    
-    // Click space theme
-    fireEvent.click(screen.getByText('Space'));
-    
-    // Check if onThemeChange was called with 'space'
-    expect(mockOnThemeChange).toHaveBeenCalledWith('space');
+    // Check that components received isGenerating=true
+    expect(mockSizeSelector.mock.calls[0][0].isGenerating).toBe(true);
+    expect(mockPortalSelector.mock.calls[0][0].isGenerating).toBe(true);
+    expect(mockThemeSelector.mock.calls[0][0].isGenerating).toBe(true);
+    expect(mockActionButtons.mock.calls[0][0].isGenerating).toBe(true);
   });
 }); 
