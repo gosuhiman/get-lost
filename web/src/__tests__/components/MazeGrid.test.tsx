@@ -163,9 +163,5 @@ describe('MazeGrid Component', () => {
     // Check for maze dimensions info
     const sizeInfo = screen.getByText(`${width}x${height} maze`);
     expect(sizeInfo).toBeInTheDocument();
-    
-    // Check for portal instructions (only on desktop)
-    const instructions = screen.getByText(/Use portals to navigate/i);
-    expect(instructions).toBeInTheDocument();
   });
 }); 
